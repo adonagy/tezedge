@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 mod listener;
+mod player;
 mod events;
 
 pub use listener::*;

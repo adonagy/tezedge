@@ -29,6 +29,15 @@ impl EventStorage {
             .map_err(StorageError::from)
     }
 
+    pub fn load_events(&self) -> Result<Vec<(u64, Event)>, StorageError> {
+        let iter = self.db.iterator(IteratorMode::Start)?;
+        let mut ret = Vec::new();
+        for (key, value) in iter {
+            ret.push((key?.0, value?))
+        }
+        Ok(ret)
+    }
+
     pub fn count_events(&self) -> Result<usize, StorageError> {
         let iter = self.db.iterator(IteratorMode::End)?;
         let mut ret = 0;
@@ -59,6 +68,11 @@ impl EventPayloadStorage {
 
     pub fn put_record(&mut self, ts: u64, record: &Vec<u8>) -> Result<(), StorageError> {
         self.db.put(&RocksStamp(ts), record)
+            .map_err(StorageError::from)
+    }
+
+    pub fn get_record(&mut self, ts: u64) -> Result<Option<Vec<u8>>, StorageError> {
+        self.db.get(&RocksStamp(ts))
             .map_err(StorageError::from)
     }
 }
