@@ -3,8 +3,11 @@ use networking::p2p::network_channel::{NetworkChannelRef, NetworkChannelTopic, P
 use rocksdb::DB;
 use std::{sync::Arc, time::Instant};
 use riker::actor::*;
-use networking::p2p::encoding::peer::PeerMessageResponse;
-use networking::p2p::binary_message::BinaryMessage;
+use networking::p2p::{
+    encoding::peer::PeerMessageResponse,
+    binary_message::BinaryMessage,
+    peer::{PeerRef, PeerMsg},
+};
 use slog::{
     Logger,
     trace, debug, info, warn,
@@ -31,12 +34,14 @@ pub struct NetworkChannelPlayer {
     /// Recorded history of messages.
     history: Vec<(u64, Event)>,
     history_index: usize,
+    /// Peer to replicate the outgoing communication
+    peer: PeerRef,
 }
 
 impl NetworkChannelPlayer {
     pub fn name() -> &'static str { "network-channel-player" }
 
-    pub fn new((network_channel, db): (NetworkChannelRef, Arc<DB>)) -> Self {
+    pub fn new((network_channel, db, peer): (NetworkChannelRef, Arc<DB>, PeerRef)) -> Self {
         Self {
             events: EventStorage::new(db.clone()),
             payloads: EventPayloadStorage::new(db),
@@ -44,12 +49,14 @@ impl NetworkChannelPlayer {
             start: Instant::now(),
             history: Vec::new(),
             history_index: 0,
+            peer,
         }
     }
 
     pub fn actor(sys: &impl ActorRefFactory, rocks_db: Arc<DB>, network_channel: NetworkChannelRef) -> Result<NetworkChannelPlayerRef, CreateError> {
+        let peer = ReplayPeer::actor(sys)?;
         sys.actor_of(
-            Props::new_args(Self::new, (network_channel, rocks_db)),
+            Props::new_args(Self::new, (network_channel, rocks_db, peer)),
             Self::name(),
         )
     }
@@ -83,7 +90,6 @@ impl NetworkChannelPlayer {
         }
     }
 
-    #[allow(unreachable_code, unused_variables)]
     fn process_message(&mut self, _: PlayerSignal, log: Logger, myself: NetworkChannelPlayerRef) {
         use crate::listener::events::EventType;
         // Replay message:
@@ -114,7 +120,7 @@ impl NetworkChannelPlayer {
                                 Publish {
                                     topic: NetworkChannelTopic::NetworkEvents.into(),
                                     msg: PeerMessageReceived {
-                                        peer: unimplemented!("Fake peer required"),
+                                        peer: self.peer.clone(),
                                         message: Arc::new(message),
                                     }.into(),
                                 }, Some(myself.into()));
@@ -165,4 +171,28 @@ impl Actor for NetworkChannelPlayer {
         }
         self.process_message(msg, ctx.system.log(), ctx.myself.clone());
     }
+}
+
+// -- Fake Peer to implement PeerRef -- //
+
+/// Fake peer for replay incoming messages
+pub struct ReplayPeer;
+
+impl ReplayPeer {
+    pub fn actor(sys: &impl ActorRefFactory) -> Result<PeerRef, CreateError> {
+        sys.actor_of(
+            Props::new_args(Self::new, ()),
+            "replay-peer",
+        )
+    }
+
+    pub fn new(_: ()) -> Self {
+        Self
+    }
+}
+
+impl Actor for ReplayPeer {
+    type Msg = PeerMsg;
+
+    fn recv(&mut self, _ctx: &Context<Self::Msg>, _msg: Self::Msg, _sender: Sender) {}
 }
