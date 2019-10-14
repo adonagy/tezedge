@@ -1,10 +1,14 @@
 use super::events::{EventStorage, EventPayloadStorage, Event};
-use networking::p2p::network_channel::NetworkChannelRef;
+use networking::p2p::network_channel::{NetworkChannelRef, NetworkChannelTopic, PeerMessageReceived};
 use rocksdb::DB;
 use std::{sync::Arc, time::Instant};
 use riker::actor::*;
 use networking::p2p::encoding::peer::PeerMessageResponse;
 use networking::p2p::binary_message::BinaryMessage;
+use slog::{
+    Logger,
+    trace, debug, info, warn,
+};
 
 #[derive(Clone, Debug)]
 /// Empty message, to control reading from the database, to prevent blocking the thread, during the
@@ -26,6 +30,7 @@ pub struct NetworkChannelPlayer {
     start: Instant,
     /// Recorded history of messages.
     history: Vec<(u64, Event)>,
+    history_index: usize,
 }
 
 impl NetworkChannelPlayer {
@@ -38,6 +43,7 @@ impl NetworkChannelPlayer {
             network_channel,
             start: Instant::now(),
             history: Vec::new(),
+            history_index: 0,
         }
     }
 
@@ -77,12 +83,66 @@ impl NetworkChannelPlayer {
         }
     }
 
-    fn process_message(&mut self, _: PlayerSignal) {
+    #[allow(unreachable_code, unused_variables)]
+    fn process_message(&mut self, _: PlayerSignal, log: Logger, myself: NetworkChannelPlayerRef) {
+        use crate::listener::events::EventType;
         // Replay message:
-        // 1. Load the message data
-        // 2. Deserialize it
-        // 3. Create Testing actors to check the consistency
-        // 4. Send it by the NetworkChannel
+        let index: u64;
+        {
+            let event_data = self.next_history_data();
+            if event_data.is_none() {
+                info!(log, "Finished replaying history")
+            }
+            let (idx, data) = event_data.unwrap();
+            if data.record_type != EventType::PeerReceivedMessage {
+                debug!(log, "Skipping meta message";
+                "message_index" => idx,
+                "message_type" => format!("{}", data.record_type));
+                return;
+            }
+            index = idx.clone();
+        }
+
+        match self.payloads.get_record(index) {
+            Ok(payload) => {
+                if let Some(payload) = payload {
+                    match PeerMessageResponse::from_bytes(payload) {
+                        Ok(message) => {
+                            trace!(log, "Message parsed successfully";
+                            "message_index" => index);
+                            self.network_channel.tell(
+                                Publish {
+                                    topic: NetworkChannelTopic::NetworkEvents.into(),
+                                    msg: PeerMessageReceived {
+                                        peer: unimplemented!("Fake peer required"),
+                                        message: Arc::new(message),
+                                    }.into(),
+                                }, Some(myself.into()));
+                        }
+                        Err(err) => {
+                            warn!(log, "Failed to deserialize message";
+                            "message_index" => index,
+                            "error_message" => format!("{}", err));
+                        }
+                    }
+                } else {
+                    warn!(log, "No payload for message found";
+                    "message_index" => index);
+                }
+            }
+            Err(err) => {
+                warn!(log, "Failed to load payload for message";
+                "message_index" => index,
+                "error_message" => format!("{}", err));
+            }
+        }
+    }
+
+    /// Get reference to next message, which should be processed
+    fn next_history_data(&mut self) -> Option<&(u64, Event)> {
+        let ret = self.history.get(self.history_index);
+        self.history_index += 1;
+        ret
     }
 }
 
@@ -99,10 +159,10 @@ impl Actor for NetworkChannelPlayer {
         }
     }
 
-    fn recv(&mut self, _ctx: &Context<Self::Msg>, msg: Self::Msg, _sender: Option<BasicActorRef>) {
+    fn recv(&mut self, ctx: &Context<Self::Msg>, msg: Self::Msg, _sender: Option<BasicActorRef>) {
         if let PlayerSignal::Start = msg {
             self.start = Instant::now();
         }
-        self.process_message(msg);
+        self.process_message(msg, ctx.system.log(), ctx.myself.clone());
     }
 }

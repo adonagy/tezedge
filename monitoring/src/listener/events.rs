@@ -1,7 +1,10 @@
 // Copyright (c) SimpleStaking and Tezos-RS Contributors
 // SPDX-License-Identifier: MIT
 
-use std::sync::Arc;
+use std::{
+    sync::Arc,
+    fmt,
+};
 
 use failure::_core::cmp::max;
 use serde::{Deserialize, Serialize};
@@ -142,6 +145,12 @@ impl EventType {
         } else {
             None
         }
+    }
+}
+
+impl fmt::Display for EventType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 
