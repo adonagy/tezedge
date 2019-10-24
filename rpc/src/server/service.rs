@@ -70,11 +70,23 @@ async fn commit_hash(_sys: ActorSystem, _actor: RpcServerRef) -> ServiceResult {
     Ok(Response::new(Body::from(resp)))
 }
 
+async fn public_key(sys: ActorSystem, actor: RpcServerRef) -> ServiceResult {
+    use super::control_msg::GetPublicKey;
+
+    let public_key = ask(&sys, &actor, GetPublicKey::Request).await;
+    if let GetPublicKey::Response(public_key) = public_key {
+        Ok(Response::new(Body::from(serde_json::to_string(&public_key)?)))
+    } else {
+        empty()
+    }
+}
+
 
 async fn router(req: Request<Body>, sys: ActorSystem, actor: RpcServerRef) -> ServiceResult {
     match (req.method(), req.uri().path()) {
         (&Method::GET, "/monitor/bootstrapped") => bootstrapped(sys, actor).await,
         (&Method::GET, "/monitor/commit_hash") => commit_hash(sys, actor).await,
+        (&Method::GET, "/network/self") => public_key(sys, actor).await,
         _ => not_found()
     }
 }

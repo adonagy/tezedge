@@ -13,28 +13,31 @@ use tokio::runtime::Runtime;
 
 pub type RpcServerRef = ActorRef<RpcServerMsg>;
 
-#[actor(NetworkChannelMsg, ShellChannelMsg, GetCurrentHead)]
+#[actor(NetworkChannelMsg, ShellChannelMsg, GetCurrentHead, GetPublicKey)]
 pub struct RpcServer {
     network_channel: NetworkChannelRef,
     shell_channel: ShellChannelRef,
     // Stats
     current_head: Option<CurrentHead>,
+    // Network
+    public_key: String,
 }
 
 impl RpcServer {
     pub fn name() -> &'static str { "rpc-server" }
 
-    fn new((network_channel, shell_channel): (NetworkChannelRef, ShellChannelRef)) -> Self {
+    fn new((network_channel, shell_channel, public_key): (NetworkChannelRef, ShellChannelRef, String)) -> Self {
         Self {
             network_channel,
             shell_channel,
             current_head: None,
+            public_key,
         }
     }
 
-    pub fn actor(sys: &ActorSystem, network_channel: NetworkChannelRef, shell_channel: ShellChannelRef, addr: SocketAddr, runtime: &Runtime) -> Result<RpcServerRef, CreateError> {
+    pub fn actor(sys: &ActorSystem, network_channel: NetworkChannelRef, shell_channel: ShellChannelRef, addr: SocketAddr, runtime: &Runtime, public_key: String) -> Result<RpcServerRef, CreateError> {
         let ret = sys.actor_of(
-            Props::new_args(Self::new, (network_channel, shell_channel)),
+            Props::new_args(Self::new, (network_channel, shell_channel, public_key)),
             Self::name(),
         )?;
 
@@ -105,6 +108,21 @@ impl Receive<GetCurrentHead> for RpcServer {
                 let me: Option<BasicActorRef> = ctx.myself().into();
                 if sender.try_tell(GetCurrentHead::Response(self.current_head.clone()), me).is_err() {
                     warn!(ctx.system.log(), "Failed to send response for GetCurrentHead");
+                }
+            }
+        }
+    }
+}
+
+impl Receive<GetPublicKey> for RpcServer {
+    type Msg = RpcServerMsg;
+
+    fn receive(&mut self, ctx: &Context<Self::Msg>, msg: GetPublicKey, sender: Sender) {
+        if let GetPublicKey::Request = msg {
+            if let Some(sender) = sender {
+                let me: Option<BasicActorRef> = ctx.myself().into();
+                if sender.try_tell(GetPublicKey::Response(self.public_key.clone()), me).is_err() {
+                    warn!(ctx.system.log(), "Failed to send response for GetPublicKey");
                 }
             }
         }

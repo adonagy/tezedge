@@ -69,7 +69,7 @@ fn block_on_actors(actor_system: ActorSystem, identity: Identity, init_info: Tez
         network_channel.clone(),
         tokio_runtime.executor(),
         configuration::ENV.p2p.listener_port,
-        identity.public_key,
+        identity.public_key.clone(),
         identity.secret_key,
         identity.proof_of_work_stamp)
         .expect("Failed to create network manager");
@@ -90,7 +90,7 @@ fn block_on_actors(actor_system: ActorSystem, identity: Identity, init_info: Tez
         .expect("Failed to start websocket actor");
     let _ = Monitor::actor(&actor_system, network_channel.clone(), websocket_handler, shell_channel.clone(), rocks_db.clone())
         .expect("Failed to create monitor actor");
-    let _ = RpcServer::actor(&actor_system, network_channel.clone(), shell_channel.clone(), ([127, 0, 0, 1], 3030).into(), &tokio_runtime)
+    let _ = RpcServer::actor(&actor_system, network_channel.clone(), shell_channel.clone(), ([127, 0, 0, 1], 3030).into(), &tokio_runtime, identity.public_key)
         .expect("Failed to create RPC server");
     if configuration::ENV.record {
         info!(log, "Running in record mode");

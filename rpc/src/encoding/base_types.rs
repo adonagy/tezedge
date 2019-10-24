@@ -1,4 +1,5 @@
 use serde::{Serialize, Deserialize};
+use std::net::SocketAddr;
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct InvalidString {
@@ -62,6 +63,22 @@ pub enum TimeStamp {
     Integral(i64),
     /// RFC 3339 (1996-12-19T16:39:57-08:00)
     Rfc(String),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct P2PConnectionId {
+    addr: UniString,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    port: Option<u16>,
+}
+
+impl From<SocketAddr> for P2PConnectionId {
+    fn from(value: SocketAddr) -> Self {
+        Self {
+            addr: value.ip().to_string().into(),
+            port: Some(value.port()),
+        }
+    }
 }
 
 #[cfg(test)]
