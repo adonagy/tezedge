@@ -10,13 +10,15 @@ use crate::{
 use slog::warn;
 use std::net::SocketAddr;
 use tokio::runtime::Runtime;
+use monitoring::{MonitorRef, commands::GetPeerStats};
 
 pub type RpcServerRef = ActorRef<RpcServerMsg>;
 
-#[actor(NetworkChannelMsg, ShellChannelMsg, GetCurrentHead, GetPublicKey)]
+#[actor(NetworkChannelMsg, ShellChannelMsg, GetCurrentHead, GetPublicKey, GetPeerStats)]
 pub struct RpcServer {
     network_channel: NetworkChannelRef,
     shell_channel: ShellChannelRef,
+
     // Stats
     current_head: Option<CurrentHead>,
     // Network
@@ -126,5 +128,13 @@ impl Receive<GetPublicKey> for RpcServer {
                 }
             }
         }
+    }
+}
+
+impl Receive<GetPeerStats> for RpcServer {
+    type Msg = RpcServerMsg;
+
+    fn receive(&mut self, ctx: &Context<Self::Msg>, msg: GetPublicKey, sender: Sender) {
+        let actor = ctx.select("monitor-manager").expect("failed to get the monitor");
     }
 }

@@ -20,6 +20,7 @@ use crate::handlers::handler_messages::HandlerMessage;
 use rocksdb::DB;
 use networking::p2p::binary_message::BinaryMessage;
 use slog::{Logger, warn};
+use crate::commands::{GetPeerStats, P2PStats};
 
 
 #[derive(Clone, Debug)]
@@ -31,7 +32,7 @@ pub enum BroadcastSignal {
 
 pub type MonitorRef = ActorRef<MonitorMsg>;
 
-#[actor(BroadcastSignal, NetworkChannelMsg, SystemEvent, ShellChannelMsg)]
+#[actor(BroadcastSignal, NetworkChannelMsg, SystemEvent, ShellChannelMsg, GetPeerStats)]
 pub struct Monitor {
     event_channel: NetworkChannelRef,
     shell_channel: ShellChannelRef,
@@ -239,6 +240,31 @@ impl Receive<ShellChannelMsg> for Monitor {
             ShellChannelMsg::AllBlockOperationsReceived(_msg) => {
                 self.bootstrap_monitor.increase_block_count();
                 self.blocks_monitor.block_finished_downloading_operations();
+            }
+        }
+    }
+}
+
+impl Receive<GetPeerStats> for Monitor {
+    type Msg = MonitorMsg;
+
+    fn receive(&mut self, ctx: &Context<Self::Msg>, msg: GetPeerStats, sender: Sender) {
+        use rpc::encoding::network::P2PStats;
+
+        if let Some(sender) = sender {
+            if let GetPeerStats::Request = msg {
+                let me: Option<BasicActorRef> = ctx.myself().into();
+                let mut total_recv = 0;
+                let mut current_inflow = 0;
+
+                for monitor in self.peer_monitors.values() {
+                    total_recv += monitor.total_transferred as i64;
+                    current_inflow += monitor.current_speed() as i32;
+                }
+
+                if sender.try_tell(GetPeerStats::Response(P2PStats::new(total_recv, current_inflow, 0)), me).is_err() {
+                    warn!(ctx.system.log(), "Failed to send response for GetPeerStats");
+                }
             }
         }
     }

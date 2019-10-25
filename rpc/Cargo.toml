@@ -20,4 +20,5 @@ chrono = "0.4.9"
 
 networking = { path = "../networking" }
 shell = { path = "../shell" }
+monitoring = { path = "../monitoring" }
 tezos_encoding = { path = "../tezos/encoding" }
