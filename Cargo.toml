@@ -14,6 +14,7 @@ members = [
     "monitoring",
     "protocol_runner",
     "rpc",
+    "tools",
     "fuzz/ack_message",
     "fuzz/advertise_message",
     "fuzz/block_header_message",

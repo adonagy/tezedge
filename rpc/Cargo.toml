@@ -27,3 +27,4 @@ shell = { path = "../shell" }
 tezos_encoding = { path = "../tezos/encoding" }
 tezos_messages = { path = "../tezos/messages" }
 storage = { path = "../storage" }
+tools = { path = "../tools" }

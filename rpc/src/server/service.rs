@@ -11,10 +11,11 @@ use std::collections::HashMap;
 use std::net::SocketAddr;
 use crate::{
     ts_to_rfc3339, ServiceResult, make_json_response,
-    server::{control_msg::{GetCurrentHead, GetFullCurrentHead}, ask::ask},
+    server::{control_msg::{GetCurrentHead, GetFullCurrentHead}},
     encoding::{monitor::BootstrapInfo, base_types::*},
     rpc_actor::RpcServerRef,
 };
+use tools::ask::ask;
 
 /// Spawn new HTTP server on given address interacting with specific actor system
 pub fn spawn_server(addr: &SocketAddr, sys: ActorSystem, actor: RpcServerRef) -> impl Future<Output=Result<(), Error>> {
@@ -124,6 +125,7 @@ async fn head_chain(sys: ActorSystem, actor: RpcServerRef, chain_id: &str, _next
         empty()
     }
 }
+
 /// GET /chains/<chain_id>/blocks/<block_id> endpoint handler
 async fn chains_block_id(sys: ActorSystem, actor: RpcServerRef, chain_id: &str, block_id: &str) -> ServiceResult {
     use crate::encoding::chain::BlockInfo;

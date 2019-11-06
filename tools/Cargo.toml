@@ -1,0 +1,11 @@
+[package]
+name = "tools"
+version = "0.1.0"
+authors = ["Martin Lacko <mrt.lacko@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+riker = { git = "https://github.com/simplestaking/riker.git", branch = "slog-support" }
+futures-preview = "0.3.0-alpha.19"
