@@ -9,6 +9,8 @@ use crate::handlers::handler_messages::BlockMetrics;
 pub struct BlocksMonitor {
     threshold: usize,
     pub level: usize,
+    pub remote_level: usize,
+    pub local_level: usize,
     pub downloaded_blocks: usize,
     applied_blocks: usize,
     pub downloading_group: usize,
@@ -21,6 +23,8 @@ impl BlocksMonitor {
         Self {
             threshold,
             level: downloaded_blocks,
+            remote_level: downloaded_blocks,
+            local_level: downloaded_blocks,
             downloaded_blocks,
             applied_blocks: 0,
             downloading_group: downloaded_blocks / threshold,

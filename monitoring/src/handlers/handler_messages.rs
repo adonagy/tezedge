@@ -6,7 +6,7 @@ use std::iter::FromIterator;
 use serde::Serialize;
 use slog_derive::SerdeValue;
 
-use crate::monitors::PeerMonitor;
+use crate::monitors::{PeerMonitor, BlocksMonitor};
 
 // -------------------------- GENERAL METRICS -------------------------- //
 #[derive(Serialize, Debug, Clone)]
@@ -129,6 +129,9 @@ pub enum HandlerMessage {
     BlockApplicationStatus {
         payload: BlockApplicationMessage,
     },
+    ChainLevels {
+        payload: ChainLevelsMessage,
+    },
     NotImplemented(String),
 }
 
@@ -152,6 +155,23 @@ impl From<PeerConnectionStatus> for HandlerMessage {
 impl From<IncomingTransferMetrics> for HandlerMessage {
     fn from(payload: IncomingTransferMetrics) -> Self {
         Self::IncomingTransfer { payload }
+    }
+}
+
+// -------------------------- BLOCK LEVELS -------------------------- //
+#[derive(Clone, Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ChainLevelsMessage {
+    pub(crate) local_level: usize,
+    pub(crate) remote_level: usize,
+}
+
+impl From<&BlocksMonitor> for ChainLevelsMessage {
+    fn from(val: &BlocksMonitor) -> Self {
+        Self {
+            local_level: val.local_level,
+            remote_level: val.remote_level,
+        }
     }
 }
 

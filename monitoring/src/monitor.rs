@@ -13,7 +13,10 @@ use slog::{Logger, warn};
 use networking::p2p::{
     network_channel::{NetworkChannelMsg, NetworkChannelTopic, PeerMessageReceived, NetworkChannelRef},
 };
-use shell::shell_channel::{ShellChannelMsg, ShellChannelRef, ShellChannelTopic};
+use shell::{
+    shell_channel::{ShellChannelMsg, ShellChannelRef, ShellChannelTopic},
+    chain_manager::GetHeadInfo,
+};
 use storage::{BlockMetaStorage, IteratorMode};
 use tezos_messages::p2p::binary_message::BinaryMessage;
 
@@ -33,11 +36,12 @@ pub enum BroadcastSignal {
 
 pub type MonitorRef = ActorRef<MonitorMsg>;
 
-#[actor(BroadcastSignal, NetworkChannelMsg, SystemEvent, ShellChannelMsg)]
+#[actor(BroadcastSignal, NetworkChannelMsg, SystemEvent, ShellChannelMsg, GetHeadInfo)]
 pub struct Monitor {
     event_channel: NetworkChannelRef,
     shell_channel: ShellChannelRef,
     msg_channel: ActorRef<WebsocketHandlerMsg>,
+    db: Arc<DB>,
     // Monitors
     peer_monitors: HashMap<ActorUri, PeerMonitor>,
     bootstrap_monitor: BootstrapMonitor,
@@ -51,7 +55,7 @@ impl Monitor {
     }
 
     fn new((event_channel, msg_channel, shell_channel, db): (NetworkChannelRef, ActorRef<WebsocketHandlerMsg>, ShellChannelRef, Arc<DB>)) -> Self {
-        let blocks_meta = BlockMetaStorage::new(db);
+        let blocks_meta = BlockMetaStorage::new(db.clone());
         let downloaded = if let Ok(iter) = blocks_meta.iter(IteratorMode::Start) {
             let mut res = 0;
             for _ in iter {
@@ -67,6 +71,7 @@ impl Monitor {
             event_channel,
             shell_channel,
             msg_channel,
+            db,
             peer_monitors: HashMap::new(),
             bootstrap_monitor,
             blocks_monitor: BlocksMonitor::new(4096, downloaded),
@@ -185,7 +190,15 @@ impl Receive<BroadcastSignal> for Monitor {
                 let payload = self.blocks_monitor.snapshot();
                 self.msg_channel.tell(HandlerMessage::BlockStatus { payload }, ctx.myself().into());
                 let payload = self.block_application_monitor.snapshot();
-                self.msg_channel.tell(HandlerMessage::BlockApplicationStatus { payload }, ctx.myself().into())
+                self.msg_channel.tell(HandlerMessage::BlockApplicationStatus { payload }, ctx.myself().into());
+                self.msg_channel.tell(HandlerMessage::ChainLevels { payload: (&self.blocks_monitor).into() }, ctx.myself().into());
+                if let Ok(selection) = ctx.select("/user/chain-manager") {
+                    let myself: BasicActorRef = ctx.myself().into();
+                    warn!(ctx.system.log(), "Sent CurrentHead request");
+                    selection.try_tell(GetHeadInfo::Request, myself);
+                } else {
+                    warn!(ctx.system.log(), "Did not find the chain-manager actor");
+                }
             }
             BroadcastSignal::PeerUpdate(msg) => {
                 let msg: HandlerMessage = msg.into();
@@ -246,6 +259,26 @@ impl Receive<ShellChannelMsg> for Monitor {
             ShellChannelMsg::AllBlockOperationsReceived(_msg) => {
                 self.bootstrap_monitor.increase_block_count();
                 self.blocks_monitor.block_finished_downloading_operations();
+            }
+        }
+    }
+}
+
+impl Receive<GetHeadInfo> for Monitor {
+    type Msg = MonitorMsg;
+
+    /// Handle CurrentHead response, Monitor does not handle requests
+    fn receive(&mut self, ctx: &Context<Self::Msg>, msg: GetHeadInfo, _sender: Sender) {
+        if let GetHeadInfo::Response { local, remote: _, remote_level } = msg {
+            use slog::info;
+            info!(ctx.system.log(), "Got GetCurrentHead::Response");
+            let block_meta_storage = BlockMetaStorage::new(self.db.clone());
+            self.blocks_monitor.level = remote_level as usize;
+            self.blocks_monitor.remote_level = remote_level as usize;
+            if let Ok(Some(local_meta)) = block_meta_storage.get(&local) {
+                self.blocks_monitor.local_level = local_meta.level as usize;
+            } else {
+                warn!(ctx.system.log(), "Unable to retrieve block meta info"; "hash" => format!("{:?}", local));
             }
         }
     }
