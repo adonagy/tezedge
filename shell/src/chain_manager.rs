@@ -301,6 +301,7 @@ impl ChainManager {
                                             let operation_was_expected = missing_operations.validation_passes.remove(&operations.operations_for_block().validation_pass());
                                             if operation_was_expected {
                                                 debug!(log, "Received operations validation pass"; "validation_pass" => operations.operations_for_block().validation_pass(), "block_header_hash" => HashEncoding::new(HashType::BlockHash).bytes_to_string(&block_hash));
+                                                let had_missing_operations = operations_state.has_missing_operations();
                                                 if operations_state.process_block_operations(&operations)? {
                                                     // trigger CheckChainCompleteness
                                                     ctx.myself().tell(CheckChainCompleteness, None);
@@ -312,6 +313,7 @@ impl ChainManager {
                                                             msg: AllBlockOperationsReceived {
                                                                 hash: block.hash,
                                                                 level: block.header.level(),
+                                                                is_duplicate: !had_missing_operations,
                                                             }.into(),
                                                             topic: ShellChannelTopic::ShellEvents.into(),
                                                         }, Some(ctx.myself().into()));

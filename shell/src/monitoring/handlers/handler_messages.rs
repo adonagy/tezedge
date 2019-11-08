@@ -162,6 +162,7 @@ impl From<IncomingTransferMetrics> for HandlerMessage {
 #[derive(Clone, Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ChainLevelsMessage {
+    pub(crate) local_downloaded: usize,
     pub(crate) local_level: usize,
     pub(crate) remote_level: usize,
 }
@@ -169,6 +170,7 @@ pub struct ChainLevelsMessage {
 impl From<&BlocksMonitor> for ChainLevelsMessage {
     fn from(val: &BlocksMonitor) -> Self {
         Self {
+            local_downloaded: val.unique_downloaded_blocks,
             local_level: val.local_level,
             remote_level: val.remote_level,
         }

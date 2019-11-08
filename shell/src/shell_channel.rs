@@ -53,6 +53,7 @@ pub struct BlockReceived {
 pub struct AllBlockOperationsReceived {
     pub hash: BlockHash,
     pub level: i32,
+    pub is_duplicate: bool,
 }
 
 /// Shell channel event message.

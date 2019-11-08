@@ -12,6 +12,7 @@ pub struct BlocksMonitor {
     pub remote_level: usize,
     pub local_level: usize,
     pub downloaded_blocks: usize,
+    pub unique_downloaded_blocks: usize,
     applied_blocks: usize,
     pub downloading_group: usize,
     group_download_start: Instant,
@@ -26,6 +27,7 @@ impl BlocksMonitor {
             remote_level: downloaded_blocks,
             local_level: downloaded_blocks,
             downloaded_blocks,
+            unique_downloaded_blocks: downloaded_blocks,
             applied_blocks: 0,
             downloading_group: downloaded_blocks / threshold,
             group_download_start: Instant::now(),
@@ -37,8 +39,11 @@ impl BlocksMonitor {
         self.level += 1;
     }
 
-    pub fn block_finished_downloading_operations(&mut self) {
+    pub fn block_finished_downloading_operations(&mut self, is_duplicate: bool) {
         self.downloaded_blocks += 1;
+        if !is_duplicate {
+            self.unique_downloaded_blocks += 1;
+        }
     }
 
     pub fn block_was_applied_by_protocol(&mut self) {

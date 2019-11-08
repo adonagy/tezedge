@@ -256,9 +256,9 @@ impl Receive<ShellChannelMsg> for Monitor {
                 self.blocks_monitor.block_was_applied_by_protocol();
                 self.block_application_monitor.block_was_applied(msg);
             }
-            ShellChannelMsg::AllBlockOperationsReceived(_msg) => {
+            ShellChannelMsg::AllBlockOperationsReceived(msg) => {
                 self.bootstrap_monitor.increase_block_count();
-                self.blocks_monitor.block_finished_downloading_operations();
+                self.blocks_monitor.block_finished_downloading_operations(msg.is_duplicate);
             }
         }
     }
