@@ -15,6 +15,7 @@ pub mod shell_channel;
 pub mod chain_feeder;
 pub mod chain_manager;
 pub mod peer_manager;
+pub mod monitoring;
 
 #[inline]
 pub(crate) fn subscribe_to_actor_terminated<M, E>(sys_channel: &ChannelRef<E>, myself: ActorRef<M>)

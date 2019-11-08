@@ -3,7 +3,7 @@
 
 use std::time::Instant;
 
-use crate::handlers::handler_messages::BlockMetrics;
+use crate::monitoring::handlers::handler_messages::BlockMetrics;
 
 #[derive(Debug, Clone)]
 pub struct BlocksMonitor {

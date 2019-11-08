@@ -5,7 +5,7 @@ use std::{net::SocketAddr, time::Instant};
 
 use riker::actor::ActorUri;
 
-use crate::handlers::handler_messages::PeerMetrics;
+use crate::monitoring::handlers::handler_messages::PeerMetrics;
 
 /// Peer specific details about transfer *FROM* peer.
 pub(crate) struct PeerMonitor {

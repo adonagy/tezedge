@@ -11,7 +11,7 @@ use riker::actor::*;
 use slog::{info, Logger, warn};
 use ws::{Sender as WsSender, WebSocket};
 
-use crate::handlers::{
+use crate::monitoring::handlers::{
     handler_messages::HandlerMessage,
     ws_server::WsServer,
 };

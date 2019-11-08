@@ -8,7 +8,7 @@ use riker::actors::*;
 use slog::*;
 use tokio::runtime::Runtime;
 
-use monitoring::{listener::{
+use shell::monitoring::{listener::{
     EventPayloadStorage,
     EventStorage, NetworkChannelListener,
 }, Monitor, WebsocketHandler};

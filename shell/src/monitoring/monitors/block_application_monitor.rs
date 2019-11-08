@@ -1,7 +1,7 @@
 use std::time::Instant;
-use shell::shell_channel::BlockApplied;
-use crate::handlers::handler_messages::{BlockApplicationMessage, BlockInfo};
 use tezos_encoding::hash::{HashEncoding, HashType};
+use crate::shell_channel::BlockApplied;
+use crate::monitoring::handlers::handler_messages::{BlockApplicationMessage, BlockInfo};
 
 pub struct ApplicationMonitor {
     total_applied: usize,

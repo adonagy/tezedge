@@ -6,7 +6,7 @@ use std::iter::FromIterator;
 use serde::Serialize;
 use slog_derive::SerdeValue;
 
-use crate::monitors::{PeerMonitor, BlocksMonitor};
+use crate::monitoring::monitors::{PeerMonitor, BlocksMonitor};
 
 // -------------------------- GENERAL METRICS -------------------------- //
 #[derive(Serialize, Debug, Clone)]

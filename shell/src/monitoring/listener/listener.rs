@@ -12,7 +12,7 @@ use slog::warn;
 use networking::p2p::network_channel::{NetworkChannelMsg, NetworkChannelRef, NetworkChannelTopic};
 use tezos_messages::p2p::binary_message::BinaryMessage;
 
-use crate::listener::events::{Event, EventPayloadStorage, EventStorage, EventType};
+use crate::monitoring::listener::events::{Event, EventPayloadStorage, EventStorage, EventType};
 
 type NetworkListenerRef = ActorRef<NetworkChannelMsg>;
 

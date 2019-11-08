@@ -3,7 +3,7 @@
 
 use std::time::Instant;
 
-use crate::handlers::handler_messages::IncomingTransferMetrics;
+use crate::monitoring::handlers::handler_messages::IncomingTransferMetrics;
 
 /// General statistics about incoming transfer
 pub(crate) struct BootstrapMonitor {

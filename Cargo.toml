@@ -11,7 +11,6 @@ members = [
     "shell",
     "storage",
     "light_node",
-    "monitoring",
     "protocol_runner",
     "rpc",
     "tools",

@@ -22,6 +22,7 @@ use crate::{subscribe_to_actor_terminated, subscribe_to_network_events, subscrib
 use crate::block_state::{BlockState, MissingBlock};
 use crate::operations_state::{MissingOperations, OperationsState};
 use crate::shell_channel::{AllBlockOperationsReceived, BlockReceived, ShellChannelMsg, ShellChannelRef, ShellChannelTopic};
+use crate::monitoring::MonitorMsg;
 
 const BLOCK_HEADERS_BATCH_SIZE: usize = 10;
 const OPERATIONS_BATCH_SIZE: usize = 10;
@@ -480,15 +481,15 @@ impl Receive<GetHeadInfo> for ChainManager {
     type Msg = ChainManagerMsg;
 
     fn receive(&mut self, ctx: &Context<Self::Msg>, msg: GetHeadInfo, sender: Sender) {
-        warn!(ctx.system.log(), "Got request for current head");
         if let GetHeadInfo::Request = msg {
             if let Some(sender) = sender {
                 let me: BasicActorRef = ctx.myself().into();
-                if sender.try_tell(GetHeadInfo::Response {
+                let msg: MonitorMsg = GetHeadInfo::Response {
                     local: self.current_head.local.clone(),
                     remote: self.current_head.remote.clone(),
                     remote_level: self.current_head.remote_level,
-                }, me).is_err() {
+                }.into();
+                if sender.try_tell(msg, me).is_err() {
                     warn!(ctx.system.log(), "Failed to respond to CurrentHead request");
                 }
             }

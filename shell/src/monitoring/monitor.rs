@@ -13,19 +13,19 @@ use slog::{Logger, warn};
 use networking::p2p::{
     network_channel::{NetworkChannelMsg, NetworkChannelTopic, PeerMessageReceived, NetworkChannelRef},
 };
-use shell::{
+use crate::{
     shell_channel::{ShellChannelMsg, ShellChannelRef, ShellChannelTopic},
-    chain_manager::GetHeadInfo,
+    chain_manager::{GetHeadInfo, ChainManagerMsg},
 };
 use storage::{BlockMetaStorage, IteratorMode};
 use tezos_messages::p2p::binary_message::BinaryMessage;
 
-use crate::{
+use super::{
     handlers::handler_messages::PeerConnectionStatus,
     handlers::WebsocketHandlerMsg,
     monitors::*,
 };
-use crate::handlers::handler_messages::HandlerMessage;
+use crate::monitoring::handlers::handler_messages::HandlerMessage;
 
 #[derive(Clone, Debug)]
 pub enum BroadcastSignal {
@@ -194,8 +194,8 @@ impl Receive<BroadcastSignal> for Monitor {
                 self.msg_channel.tell(HandlerMessage::ChainLevels { payload: (&self.blocks_monitor).into() }, ctx.myself().into());
                 if let Ok(selection) = ctx.select("/user/chain-manager") {
                     let myself: BasicActorRef = ctx.myself().into();
-                    warn!(ctx.system.log(), "Sent CurrentHead request");
-                    selection.try_tell(GetHeadInfo::Request, myself);
+                    let message: ChainManagerMsg = GetHeadInfo::Request.into();
+                    selection.try_tell(message, myself);
                 } else {
                     warn!(ctx.system.log(), "Did not find the chain-manager actor");
                 }
@@ -270,8 +270,6 @@ impl Receive<GetHeadInfo> for Monitor {
     /// Handle CurrentHead response, Monitor does not handle requests
     fn receive(&mut self, ctx: &Context<Self::Msg>, msg: GetHeadInfo, _sender: Sender) {
         if let GetHeadInfo::Response { local, remote: _, remote_level } = msg {
-            use slog::info;
-            info!(ctx.system.log(), "Got GetCurrentHead::Response");
             let block_meta_storage = BlockMetaStorage::new(self.db.clone());
             self.blocks_monitor.level = remote_level as usize;
             self.blocks_monitor.remote_level = remote_level as usize;
