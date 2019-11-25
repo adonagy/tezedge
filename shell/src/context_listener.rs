@@ -13,6 +13,8 @@ use slog::{debug, Logger, warn};
 use storage::{ContextStorage, ContextRecordKey, ContextRecordValue};
 use tezos_context::channel::ContextAction;
 use tezos_wrapper::service::IpcEvtServer;
+use std::collections::HashMap;
+use tezos_context::ContextValue;
 
 type SharedJoinHandle = Arc<Mutex<Option<JoinHandle<Result<(), Error>>>>>;
 
@@ -97,13 +99,13 @@ fn listen_protocol_events(
     context_storage: &mut ContextStorage,
     log: &Logger,
 ) -> Result<(), Error> {
-
     debug!(log, "Waiting for connection from protocol runner");
     let mut rx = event_server.accept()?;
     debug!(log, "Received connection from protocol runner. Starting to process context events.");
 
     let mut event_count = 0;
     while apply_block_run.load(Ordering::Acquire) {
+        let mut state: HashMap<ContextRecordKey, ContextValue> = Default::default();
         match rx.receive() {
             Ok(ContextAction::Shutdown) => break,
             Ok(msg) => {
@@ -113,13 +115,28 @@ fn listen_protocol_events(
                 event_count += 1;
 
                 match &msg {
-                    ContextAction::Set { block_hash: Some(block_hash), operation_hash, key, .. }
-                    | ContextAction::Copy { block_hash: Some(block_hash), operation_hash, to_key: key, .. }
-                    | ContextAction::Delete { block_hash: Some(block_hash), operation_hash, key, .. }
+                    ContextAction::Set { block_hash: Some(block_hash), operation_hash, key, value, .. } => {
+                        let record_key = ContextRecordKey::new(block_hash, operation_hash, key);
+                        let value = value.clone();
+                        let record_value = ContextRecordValue::new(msg);
+                        context_storage.put(&record_key, &record_value)?;
+                        state.insert(record_key, value.clone());
+                    }
+                    ContextAction::Copy { block_hash: Some(block_hash), operation_hash, to_key: key, from_key, .. } => {
+                        let record_key = ContextRecordKey::new(block_hash, operation_hash, key);
+                        let record_from_key = ContextRecordKey::new(block_hash, operation_hash, from_key);
+                        let record_value = ContextRecordValue::new(msg);
+                        context_storage.put(&record_key, &record_value)?;
+                        if state.contains_key(&record_from_key) {
+                            state.insert(record_key, state.get(&record_from_key).unwrap().clone());
+                        }
+                    }
+                    ContextAction::Delete { block_hash: Some(block_hash), operation_hash, key, .. }
                     | ContextAction::RemoveRecord { block_hash: Some(block_hash), operation_hash, key, .. } => {
                         let record_key = ContextRecordKey::new(block_hash, operation_hash, key);
                         let record_value = ContextRecordValue::new(msg);
                         context_storage.put(&record_key, &record_value)?;
+                        state.remove(&record_key);
                     }
                     _ => (),
                 };
@@ -127,9 +144,8 @@ fn listen_protocol_events(
             Err(err) => {
                 warn!(log, "Failed to receive event from protocol runner"; "reason" => format!("{:?}", err));
                 break;
-            },
+            }
         }
-
     }
 
     Ok(())

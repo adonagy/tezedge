@@ -6,6 +6,7 @@ use rocksdb::{ColumnFamilyDescriptor, Options};
 
 use tezos_encoding::hash::Hash;
 use serde::{Serialize, Deserialize};
+use std::collections::HashMap;
 
 /// Possible errors for schema
 #[derive(Debug, Fail)]
@@ -67,6 +68,12 @@ impl<T: BincodeEncoded> Codec for T {
         T::encode(self)
     }
 }
+
+impl<K, V> BincodeEncoded for HashMap<K, V>
+    where
+        K: std::hash::Hash + Eq + Serialize + for<'a> Deserialize<'a>,
+        V: Serialize + for<'a> Deserialize<'a>
+{}
 
 pub trait BincodeEncoded: Sized + Serialize + for<'a> Deserialize<'a> {
     fn decode(bytes: &[u8]) -> Result<Self, SchemaError> {

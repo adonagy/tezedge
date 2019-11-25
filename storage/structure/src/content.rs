@@ -1,6 +1,7 @@
 use storage::persistent::{Codec, SchemaError};
 use serde::{Serialize, Deserialize};
 use crate::LEVEL_BASE;
+use std::collections::HashMap;
 
 /// Structure for orientation in the list.
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -75,11 +76,31 @@ impl Codec for NodeHeader {
 /// Value must be able to be recreated by merging, and then split by difference.
 /// diff = A.diff(B);
 /// A.merge(diff) == B
-pub trait ListValue: Codec + Default + std::fmt::Debug {
+pub trait ListValue: Codec + Default {
     /// Merge two values into one, in-place
-    fn merge(&mut self, other: &Self);
+    fn merge(self, other: Self) -> Self;
     /// Create difference between two values.
-    fn diff(&mut self, other: &Self);
+    fn diff(self, other: Self) -> Self;
+}
+
+impl<K, V> ListValue for HashMap<K, V>
+    where
+        K: std::hash::Hash + Eq + Serialize + for<'a> Deserialize<'a> + Clone,
+        V: Serialize + for<'a> Deserialize<'a> + Clone
+{
+    fn merge(mut self, other: Self) -> Self {
+        self.extend(other);
+        self
+    }
+
+    fn diff(mut self, other: Self) -> Self {
+        for (k, v) in other {
+            if !self.contains_key(&k) {
+                self.insert(k, v);
+            }
+        }
+        self
+    }
 }
 
 #[cfg(test)]

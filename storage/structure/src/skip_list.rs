@@ -64,9 +64,8 @@ impl<C: ListValue> SkipList<C> {
 
         loop {
             if let Some(value) = lane.get(pos.index()) {
-                if let Some(mut state) = current_state {
-                    state.merge(&value);
-                    current_state = Some(state);
+                if let Some(state) = current_state {
+                    current_state = Some(state.merge(value));
                 } else {
                     current_state = Some(value);
                 }
@@ -117,9 +116,8 @@ impl<C: ListValue> SkipList<C> {
                     }
                 })
                 .fold(None, |state: Option<C>, value| {
-                    if let Some(mut state) = state {
-                        state.diff(&value);
-                        Some(state)
+                    if let Some(state) = state {
+                        Some(state.diff(value))
                     } else {
                         Some(value)
                     }

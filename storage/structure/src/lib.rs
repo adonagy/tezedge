@@ -82,17 +82,19 @@ pub mod common_testing {
 
     impl ListValue for Value {
         /// Merge two sets
-        fn merge(&mut self, other: &Self) {
-            self.0.extend(&other.0)
+        fn merge(mut self, other: Self) -> Self {
+            self.0.extend(other.0);
+            self
         }
 
-        /// Create the
-        fn diff(&mut self, other: &Self) {
-            for x in &other.0 {
-                if !self.0.contains(x) {
-                    self.0.insert(*x);
+        /// Create the difference value
+        fn diff(mut self, other: Self) -> Self {
+            for k in other.0 {
+                if !self.0.contains(&k) {
+                    self.0.insert(k);
                 }
             }
+            self
         }
     }
 
@@ -108,18 +110,18 @@ pub mod common_testing {
     }
 
     impl ListValue for OrderedValue {
-        /// Merge two sets
-        fn merge(&mut self, other: &Self) {
-            self.0.extend(&other.0)
+        fn merge(mut self, other: Self) -> Self {
+            self.0.extend(other.0);
+            self
         }
 
-        /// Create the
-        fn diff(&mut self, other: &Self) {
-            for (k, v) in &other.0 {
-                if !self.0.contains_key(k) {
-                    self.0.insert(*k, *v);
+        fn diff(mut self, other: Self) -> Self {
+            for (k, v) in other.0 {
+                if !self.0.contains_key(&k) {
+                    self.0.insert(k, v);
                 }
             }
+            self
         }
     }
 
