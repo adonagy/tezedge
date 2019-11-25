@@ -37,7 +37,7 @@ impl ContextStorage {
     }
 }
 
-#[derive(PartialEq, Debug, Eq, Hash)]
+#[derive(PartialEq, Debug, Eq, Hash, Clone, Serialize, Deserialize)]
 pub struct ContextRecordKey {
     block_hash: BlockHash,
     key_hash: ContextKeyHash,

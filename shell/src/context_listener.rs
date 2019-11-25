@@ -11,6 +11,7 @@ use riker::actors::*;
 use slog::{debug, Logger, warn};
 
 use storage::{ContextStorage, ContextRecordKey, ContextRecordValue};
+use structure::SkipList;
 use tezos_context::channel::ContextAction;
 use tezos_wrapper::service::IpcEvtServer;
 use std::collections::HashMap;
@@ -35,12 +36,13 @@ impl ContextListener {
             let listener_run = listener_run.clone();
 
             thread::spawn(move || {
-                let mut context_storage = ContextStorage::new(rocks_db);
+                let mut context_storage = ContextStorage::new(rocks_db.clone());
                 while listener_run.load(Ordering::Acquire) {
                     match listen_protocol_events(
                         &listener_run,
                         &mut event_server,
                         &mut context_storage,
+                        rocks_db.clone(),
                         &log,
                     ) {
                         Ok(()) => debug!(log, "Context listener finished"),
@@ -97,6 +99,7 @@ fn listen_protocol_events(
     apply_block_run: &AtomicBool,
     event_server: &mut IpcEvtServer,
     context_storage: &mut ContextStorage,
+    db: Arc<rocksdb::DB>,
     log: &Logger,
 ) -> Result<(), Error> {
     debug!(log, "Waiting for connection from protocol runner");
@@ -104,6 +107,7 @@ fn listen_protocol_events(
     debug!(log, "Received connection from protocol runner. Starting to process context events.");
 
     let mut event_count = 0;
+    let mut list = SkipList::new(db);
     while apply_block_run.load(Ordering::Acquire) {
         let mut state: HashMap<ContextRecordKey, ContextValue> = Default::default();
         match rx.receive() {
@@ -137,6 +141,9 @@ fn listen_protocol_events(
                         let record_value = ContextRecordValue::new(msg);
                         context_storage.put(&record_key, &record_value)?;
                         state.remove(&record_key);
+                    }
+                    ContextAction::Commit { .. } => {
+                        list.push(std::mem::replace(&mut state, Default::default()));
                     }
                     _ => (),
                 };
