@@ -1,6 +1,10 @@
 kind: pipeline
 name: default
 
+workspace:
+  base: /tezedge/src
+  path: github.com/adonagy/tezedge
+
 steps:
 - name: build
   image: simplestakingcom/tezos-opam-builder:debian10
@@ -10,7 +14,7 @@ steps:
     SODIUM_USE_PKG_CONFIG: 1
     OCAML_BUILD_CHAIN: remote
   commands:
-    - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly-2019-11-25 -y
-    - cd /home/appuser && git clone https://github.com/simplestaking/tezedge.git && cd tezedge && cargo build --release
+    - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain ${rust_toolchain} -y
     - mkdir /tmp/tezedge
     - chown appuser:appuser /tmp/tezedge
+    - cargo build --release
