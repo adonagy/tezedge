@@ -1,9 +1,13 @@
 kind: pipeline
 name: default
 
+workspace:
+  base: /rust
+  path: src/github.com/tezedge
+
 steps:
 - name: build
-  image: rust:latest
+  image: simplestakingcom/tezos-opam-builder:debian10
   environment:
     PATH: /home/appuser/.cargo/bin:$PATH
     RUST_BACKTRACE: 1
