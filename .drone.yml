@@ -14,4 +14,5 @@ steps:
     SODIUM_USE_PKG_CONFIG: 1
     OCAML_BUILD_CHAIN: remote
   commands:
+    - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly-2019-11-25 -y
     - cargo build --release
