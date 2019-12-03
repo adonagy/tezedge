@@ -8,12 +8,11 @@ workspace:
 steps:
 - name: build
   image: simplestakingcom/tezos-opam-builder:debian10
-  shell: sh
   environment:
     RUST_BACKTRACE: 1
     SODIUM_USE_PKG_CONFIG: 1
     OCAML_BUILD_CHAIN: remote
   commands:
     - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly-2019-11-25 -y
-    - source $HOME/.cargo/env
+    - export PATH="$HOME/.cargo/bin:$PATH"
     - cargo build --release
