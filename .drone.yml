@@ -10,6 +10,4 @@ steps:
     SODIUM_USE_PKG_CONFIG: 1
     OCAML_BUILD_CHAIN: remote
   commands:
-    - mkdir /tmp/tezedge
-    - chown appuser:appuser /tmp/tezedge
     - cargo build --release
