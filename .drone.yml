@@ -1,10 +1,6 @@
 kind: pipeline
 name: default
 
-workspace:
-  base: /rust
-  path: src/github.com/tezedge
-
 steps:
 - name: build
   image: simplestakingcom/tezos-opam-builder:debian10
