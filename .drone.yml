@@ -21,6 +21,8 @@ steps:
   environment:
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
   commands:
+    - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly-2019-11-25 -y
+    - export PATH="$HOME/.cargo/bin:$PATH"
     - cargo run --release --bin light-node -- \
                             --config-file "./light_node/etc/tezedge/tezedge.config" \
                             --tezos-data-dir "/tmp/tezedge/tezos-data" \
