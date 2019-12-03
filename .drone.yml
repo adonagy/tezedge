@@ -4,7 +4,6 @@ name: default
 steps:
 - name: build
   image: simplestakingcom/tezos-opam-builder:debian10
-  user: appuser
   environment:
     RUST_BACKTRACE: 1
     SODIUM_USE_PKG_CONFIG: 1
@@ -12,4 +11,5 @@ steps:
   commands:
     - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly-2019-11-25 -y
     - export PATH="$HOME/.cargo/bin:$PATH"
+    - mkdir target 
     - cargo clean && cargo build --release
