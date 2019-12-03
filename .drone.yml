@@ -8,6 +8,7 @@ workspace:
 steps:
 - name: build
   image: simplestakingcom/tezos-opam-builder:debian10
+  shell: sh
   environment:
     PATH: /home/appuser/.cargo/bin:$PATH
     RUST_BACKTRACE: 1
