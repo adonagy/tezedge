@@ -15,4 +15,5 @@ steps:
     OCAML_BUILD_CHAIN: remote
   commands:
     - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly-2019-11-25 -y
+    - source $HOME/.cargo/env
     - cargo build --release
