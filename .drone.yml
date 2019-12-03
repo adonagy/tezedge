@@ -15,3 +15,9 @@ steps:
     - export PATH="$HOME/.cargo/bin:$PATH"
     - cargo clean && cargo build --release
     - mkdir /tmp/tezedge
+
+- name: tests
+  image: rust:latest
+  user: root
+  commands:
+    - cargo test
