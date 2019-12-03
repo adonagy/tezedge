@@ -14,6 +14,7 @@ steps:
     SODIUM_USE_PKG_CONFIG: 1
     OCAML_BUILD_CHAIN: remote
   commands:
+    - apt install curl
     - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain ${rust_toolchain} -y
     - mkdir /tmp/tezedge
     - chown appuser:appuser /tmp/tezedge
