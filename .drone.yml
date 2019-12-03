@@ -15,4 +15,4 @@ steps:
   commands:
     - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly-2019-11-25 -y
     - export PATH="$HOME/.cargo/bin:$PATH"
-    - cargo build --release
+    - cargo clean && cargo build --release
