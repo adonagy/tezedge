@@ -11,7 +11,7 @@ steps:
     OCAML_BUILD_CHAIN: remote
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
   commands:
-    - apt install -y libssl-dev
+    - apt-get install -y libssl-dev
     - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly-2019-11-25 -y
     - export PATH="$HOME/.cargo/bin:$PATH"
     - cargo clean && cargo build --release
