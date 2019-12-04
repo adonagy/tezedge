@@ -19,6 +19,9 @@ steps:
   user: root
   detach: true
   environment:
+    RUST_BACKTRACE: 1
+    SODIUM_USE_PKG_CONFIG: 1
+    OCAML_BUILD_CHAIN: remote
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
   commands: 
     - cargo build --release
