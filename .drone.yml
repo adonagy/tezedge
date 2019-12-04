@@ -33,7 +33,7 @@ steps:
   image: adonagy/tezedge-ci-builder:latest
   user: root
   commands:
-    - sleep 30
+    - sleep 300
     - cargo test --release test_heads
 
 # - name: tests
