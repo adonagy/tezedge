@@ -55,6 +55,7 @@ fn get_head(node_type: NodeType) -> Result<serde_json::value::Value> {
     let mut res = reqwest::blocking::get(url)?;
     let mut body = String::new();
     res.read_to_string(&mut body)?;
+    println!("{}", body);
 
     Ok(serde_json::from_str(&body)?)
 }
