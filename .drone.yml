@@ -29,8 +29,8 @@ steps:
   image: adonagy/tezedge-ci-builder:latest
   user: root
   commands:
-    - sleep 10
     - cargo test --release test_heads
+    - sleep 30
 
 # - name: tests
 #   image: rust:latest
