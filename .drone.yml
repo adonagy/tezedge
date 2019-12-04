@@ -15,8 +15,26 @@ steps:
     - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly-2019-11-25 -y
     - export PATH="$HOME/.cargo/bin:$PATH"
     - cargo clean && cargo build --release
+
+- name: node-run
+  image: simplestakingcom/tezos-opam-builder:debian10
+  user: root
+  detach: true
+  commands: 
+    - apt-get update && apt-get install -y libssl-dev
+    - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly-2019-11-25 -y
     - mkdir /tmp/tezedge
     - cargo run --release --bin light-node -- --config-file ./light_node/etc/tezedge/tezedge.config --log-file /tmp/logs/tezdge.log --protocol-runner "./target/release/protocol-runner"
+
+
+- name: test
+  image: simplestakingcom/tezos-opam-builder:debian10
+  user: root
+  commands:
+    - apt-get update && apt-get install -y libssl-dev
+    - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain nightly-2019-11-25 -y
+    - sleep 10
+    - cargo test --release test_heads
 
 # - name: tests
 #   image: rust:latest
