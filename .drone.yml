@@ -22,8 +22,8 @@ steps:
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
   commands: 
     - mkdir /tmp/tezedge
+    - cat /tmp/identity/identity.json
     - cargo run --release --bin light-node -- --config-file ./light_node/etc/tezedge/tezedge.config --log-file /tmp/logs/tezdge.log --protocol-runner "./target/release/protocol-runner" --identity-file /tmp/identity/identity.json
-
 
 - name: test
   image: adonagy/tezedge-ci-builder:latest
