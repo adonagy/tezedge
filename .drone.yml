@@ -16,6 +16,7 @@ steps:
     - export PATH="$HOME/.cargo/bin:$PATH"
     - cargo clean && cargo build --release
     - mkdir /tmp/tezedge
+    - cargo run --bin light-node -- --config-file ./light_node/etc/tezedge/tezedge.config --log-file /tmp/logs/tezdge.log
 
 # - name: tests
 #   image: rust:latest
