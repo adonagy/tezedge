@@ -73,7 +73,7 @@ fn wait_to_bootsrapp() {
 #[allow(dead_code)]
 fn is_bootstrapped() -> Result<String, reqwest::Error> {
     let response: String =
-        reqwest::blocking::get("http://127.0.0.1:18732/monitor/bootstrapped")?.text()?;
+        reqwest::blocking::get("http://tezedge-node-run:18732/monitor/bootstrapped")?.text()?;
 
     let response_node: Bootstrapped =
         serde_json::from_str(&response).expect("JSON was not well-formatted");
