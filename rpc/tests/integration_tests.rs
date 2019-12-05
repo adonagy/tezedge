@@ -1,5 +1,5 @@
-#[macro_use]
-extern crate assert_json_diff;
+// #[macro_use]
+// extern crate assert_json_diff;
 extern crate reqwest;
 extern crate serde;
 
@@ -78,7 +78,7 @@ fn is_bootstrapped() -> Result<String, reqwest::Error> {
     let response: String =
         reqwest::blocking::get("http://tezedge-node-run:18732/monitor/bootstrapped")?.text()?;
 
-    let response_node: Bootstrapped = serde_json::from_str(&response);
+    let response_node: Bootstrapped = match serde_json::from_str(&response) {};
 
     Ok(response_node.block.to_string())
 }
