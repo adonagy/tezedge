@@ -35,7 +35,7 @@ fn test_heads() {
 fn get_block(block_id: &String) -> Result<serde_json::value::Value> {
     let url = format!(
         "{}{}",
-        "http://46.101.160.245:3000/chains/main/blocks/",
+        "http://ocaml-node-run:8732/chains/main/blocks/",
         block_id.replace("\"", "")
     );
 
@@ -48,8 +48,8 @@ fn get_block(block_id: &String) -> Result<serde_json::value::Value> {
 
 fn get_head(node_type: NodeType) -> Result<serde_json::value::Value> {
     let url = match node_type {
-        NodeType::Ocaml => "http://46.101.160.245:3000/chains/main/blocks/head", // reference Ocaml node
-        NodeType::Tezedge => "http://node-run:18732/chains/main/blocks/head", // locally built Tezedge node
+        NodeType::Ocaml => "http://ocaml-node-run:8732/chains/main/blocks/head", // reference Ocaml node
+        NodeType::Tezedge => "http://tezedge-node-run:18732/chains/main/blocks/head", // locally built Tezedge node
     };
 
     let mut res = reqwest::blocking::get(url)?;
