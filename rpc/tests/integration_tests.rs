@@ -63,7 +63,10 @@ fn wait_to_bootsrapp() {
                     thread::sleep(Duration::from_secs(10));
                 }
             }
-            Err(e) => println!("Error in bootstrap check: {}", e),
+            Err(e) => {
+                println!("Error in bootstrap check: {}", e);
+                thread::sleep(Duration::from_secs(10));
+            }
         }
     });
 
