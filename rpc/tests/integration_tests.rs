@@ -52,6 +52,15 @@ fn test_heads() {
 // }
 
 fn wait_to_bootsrapp() {
+    let connect_thread = thread::spawn(|| loop {
+        let resp = reqwest::blocking::get("http://tezedge-node-run:18732/monitor/bootstrapped");
+        if resp.unwrap().status().is_success() {
+            break;
+        } else {
+            thread::sleep(Duration::from_secs(10));
+        }
+    });
+
     let bootstrap_monitoring_thread = thread::spawn(|| loop {
         match is_bootstrapped() {
             Ok(s) => {
@@ -70,6 +79,7 @@ fn wait_to_bootsrapp() {
         }
     });
 
+    connect_thread.join();
     bootstrap_monitoring_thread.join();
 }
 
@@ -78,7 +88,8 @@ fn is_bootstrapped() -> Result<String, reqwest::Error> {
     let response: String =
         reqwest::blocking::get("http://tezedge-node-run:18732/monitor/bootstrapped")?.text()?;
 
-    let response_node: Bootstrapped = match serde_json::from_str(&response) {};
+    let response_node: Bootstrapped =
+        serde_json::from_str(&response).expect("JSON was not well-formatted");
 
     Ok(response_node.block.to_string())
 }
