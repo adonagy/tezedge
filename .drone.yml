@@ -27,7 +27,7 @@ steps:
     - cargo build --release
     - mkdir /tmp/tezedge
     - cat /tmp/identity/identity.json
-    - cargo run --release --bin light-node -- --config-file ./light_node/etc/tezedge/tezedge.config --log-file /tmp/logs/tezdge.log --protocol-runner "./target/release/protocol-runner" --identity-file /tmp/identity/identity.json
+    - cargo run --release --bin light-node -- --config-file ./light_node/etc/tezedge/tezedge.config --protocol-runner "./target/release/protocol-runner" --identity-file /tmp/identity/identity.json
 
 - name: ocaml-node-run
   image: tezos/tezos:babylonnet
