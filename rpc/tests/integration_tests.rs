@@ -14,7 +14,7 @@ pub enum NodeType {
 #[derive(Debug, Deserialize)]
 struct Bootstrapped {
     block: String,
-    timestamp: u64,
+    timestamp: String,
 }
 
 use std::thread;
@@ -78,8 +78,7 @@ fn is_bootstrapped() -> Result<String, reqwest::Error> {
     let response: String =
         reqwest::blocking::get("http://tezedge-node-run:18732/monitor/bootstrapped")?.text()?;
 
-    let response_node: Bootstrapped =
-        serde_json::from_str(&response).expect("JSON was not well-formatted");
+    let response_node: Bootstrapped = serde_json::from_str(&response);
 
     Ok(response_node.block.to_string())
 }
