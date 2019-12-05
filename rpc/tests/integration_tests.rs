@@ -1,9 +1,9 @@
 #[macro_use]
 extern crate assert_json_diff;
-
 extern crate reqwest;
 extern crate serde;
-use std::io::Read;
+
+use serde::Deserialize;
 
 #[derive(Debug)]
 pub enum NodeType {
@@ -11,51 +11,105 @@ pub enum NodeType {
     Ocaml,
 }
 
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
+#[derive(Debug, Deserialize)]
+struct Bootstrapped {
+    block: String,
+    timestamp: u64,
+}
+
+use std::thread;
+use std::time::Duration;
 
 #[test]
 fn test_heads() {
-    let rust_head = match get_head(NodeType::Tezedge) {
-        Ok(v) => v,
-        Err(e) => panic!("Invalid json: {}", e),
-    };
+    wait_to_bootsrapp();
+    println!("Good!")
 
-    let block_id: String = rust_head["hash"].to_string();
+    // let rust_head = match get_head(NodeType::Tezedge) {
+    //     Ok(v) => v,
+    //     Err(e) => panic!("Invalid json: {}", e),
+    // };
 
-    let ocaml_block = match get_block(&block_id) {
-        Ok(v) => v,
-        Err(e) => panic!("Invalid json: {}", e),
-    };
+    // let block_id: String = rust_head["hash"].to_string();
 
-    // TODO: make it more obvious in the output
-    //              actual      expected
-    assert_json_eq!(rust_head, ocaml_block);
+    // let ocaml_block = match get_block(&block_id) {
+    //     Ok(v) => v,
+    //     Err(e) => panic!("Invalid json: {}", e),
+    // };
+
+    // // TODO: make it more obvious in the output
+    // //              actual      expected
+    // assert_json_eq!(rust_head, ocaml_block);
 }
 
-fn get_block(block_id: &String) -> Result<serde_json::value::Value> {
+// #[test]
+// fn test_first_1k_heads() {
+//     // should we use recursion?
+//     // TODO: test recursion
+
+//     let next_block = "BM9xFVaVv6mi7ckPbTgxEe7TStcfFmteJCpafUZcn75qi2wAHrC"; // 1000th
+
+// }
+
+fn wait_to_bootsrapp() {
+    let bootstrap_monitoring_thread = thread::spawn(|| loop {
+        match is_bootstrapped() {
+            Ok(s) => {
+                if s == "BM9xFVaVv6mi7ckPbTgxEe7TStcfFmteJCpafUZcn75qi2wAHrC" {
+                    println!("Done Bootstrapping");
+                    break;
+                } else {
+                    println!("Bootstrapping . . . block: {}", s);
+                    thread::sleep(Duration::from_secs(10));
+                }
+            }
+            Err(e) => panic!("Error in bootstrap check: {}", e),
+        }
+    });
+
+    bootstrap_monitoring_thread.join();
+}
+
+#[allow(dead_code)]
+fn is_bootstrapped() -> Result<String, reqwest::Error> {
+    let response: String =
+        reqwest::blocking::get("http://127.0.0.1:18732/monitor/bootstrapped")?.text()?;
+
+    let response_node: Bootstrapped =
+        serde_json::from_str(&response).expect("JSON was not well-formatted");
+
+    Ok(response_node.block.to_string())
+}
+
+fn get_block(block_id: &String) -> Result<serde_json::value::Value, serde_json::error::Error> {
     let url = format!(
         "{}{}",
         "http://ocaml-node-run:8732/chains/main/blocks/",
         block_id.replace("\"", "")
     );
 
-    let mut res = reqwest::blocking::get(&url)?;
-    let mut body = String::new();
-    res.read_to_string(&mut body)?;
+    let res = match reqwest::blocking::get(&url) {
+        Ok(v) => v,
+        Err(e) => panic!("Request for getting block failed: {}", e),
+    };
+    //let mut body = String::new();
+    //res.read_to_string(&mut body);
 
-    Ok(serde_json::from_str(&body)?)
+    serde_json::from_str(&res.text().unwrap())
 }
 
-fn get_head(node_type: NodeType) -> Result<serde_json::value::Value> {
+fn get_head(node_type: NodeType) -> Result<serde_json::value::Value, serde_json::error::Error> {
     let url = match node_type {
         NodeType::Ocaml => "http://ocaml-node-run:8732/chains/main/blocks/head", // reference Ocaml node
         NodeType::Tezedge => "http://tezedge-node-run:18732/chains/main/blocks/head", // locally built Tezedge node
     };
 
-    let mut res = reqwest::blocking::get(url)?;
-    let mut body = String::new();
-    res.read_to_string(&mut body)?;
-    // println!("{}", body);
+    let res = match reqwest::blocking::get(url) {
+        Ok(v) => v,
+        Err(e) => panic!("Request for getting block failed: {}", e),
+    };
+    //let mut body = String::new();
+    //res.read_to_string(&mut body);
 
-    Ok(serde_json::from_str(&body)?)
+    serde_json::from_str(&res.text().unwrap())
 }
