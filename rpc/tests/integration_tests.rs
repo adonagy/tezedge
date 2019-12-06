@@ -65,15 +65,20 @@ fn wait_to_bootsrapp() {
     let bootstrap_monitoring_thread = thread::spawn(|| loop {
         match is_bootstrapped() {
             Ok(s) => {
-                let desired_timestamp =
-                    DateTime::parse_from_rfc3339("2019-09-28T08:14:24Z").unwrap();
-                let block_timestamp = DateTime::parse_from_rfc3339(&s).unwrap();
+                if s != "" {
+                    let desired_timestamp =
+                        DateTime::parse_from_rfc3339("2019-09-28T08:14:24Z").unwrap();
+                    let block_timestamp = DateTime::parse_from_rfc3339(&s).unwrap();
 
-                if block_timestamp >= desired_timestamp {
-                    println!("Done Bootstrapping");
-                    break;
+                    if block_timestamp >= desired_timestamp {
+                        println!("Done Bootstrapping");
+                        break;
+                    } else {
+                        println!("Bootstrapping . . . timestamp: {}", s);
+                        thread::sleep(Duration::from_secs(10));
+                    }
                 } else {
-                    println!("Bootstrapping . . . timestamp: {}", s);
+                    println!("Waiting for node to start bootstrapping...");
                     thread::sleep(Duration::from_secs(10));
                 }
             }
