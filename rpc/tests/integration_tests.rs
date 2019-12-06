@@ -114,6 +114,8 @@ fn create_monitor_node_thread(node: NodeType) -> JoinHandle<()> {
             Err(_e) => {
                 // panic!("Error in bootstrap check: {}", e);
                 println!("[{}] Waiting for node to run", node.to_string());
+                println!("[{}] Error: {}", node.to_string(), _e);
+
                 thread::sleep(Duration::from_secs(10));
             }
         }
