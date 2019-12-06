@@ -89,7 +89,7 @@ fn is_bootstrapped() -> Result<String, reqwest::Error> {
         reqwest::blocking::get("http://tezedge-node-run:18732/monitor/bootstrapped")?.text()?;
 
     // hack to handle case when the node did not start the bootstrapping process and retruns timestamp with int 0
-    if response.contains("\"timestamp\": 0") {
+    if response.contains(r#""timestamp":0"#) {
         Ok(String::new())
     } else {
         let response_node: Bootstrapped =
