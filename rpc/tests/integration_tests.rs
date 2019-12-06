@@ -1,3 +1,5 @@
+// PoC, needs refactoring
+
 #[macro_use]
 extern crate assert_json_diff;
 extern crate reqwest;
@@ -48,13 +50,12 @@ fn test_first_1k_heads() {
             .replace("\"", "");
 
         // NOTE: this will allways fail for now due to unimplemented properties in tezedge
-        // to verify the loop, we just print the next block to be checked
-        //assert_json_eq!(tezedge_json, ocaml_json);
+        assert_json_eq!(tezedge_json, ocaml_json);
 
         // TODO: remove this line
-        println!("{}", &next_block);
 
         // debug: remove later
+        // NOTE: cannot get genesis block from node
         if next_block == "BLockGenesisGenesisGenesisGenesisGenesisd1f7bcGMoXy" {
             println!("Genesis block reached and checked, breaking loop...");
             break;
@@ -75,6 +76,7 @@ fn create_monitor_node_thread(node: NodeType) -> JoinHandle<()> {
     let bootstrap_monitoring_thread = thread::spawn(move || loop {
         match is_bootstrapped(&node) {
             Ok(s) => {
+                // empty string means, the rpc server is running, but the bootstraping has not started yet
                 if s != "" {
                     let desired_timestamp =
                         DateTime::parse_from_rfc3339("2019-09-28T08:14:24Z").unwrap();
@@ -101,6 +103,7 @@ fn create_monitor_node_thread(node: NodeType) -> JoinHandle<()> {
             }
             Err(_e) => {
                 // panic!("Error in bootstrap check: {}", e);
+                // NOTE: This should be handled more carefully
                 println!("[{}] Waiting for node to run", node.to_string());
                 println!("[{}] Error: {}", node.to_string(), _e);
 
@@ -125,6 +128,7 @@ fn is_bootstrapped(node: &NodeType) -> Result<String, reqwest::Error> {
                 reqwest::blocking::get("http://ocaml-node-run:8732/chains/main/blocks/head")?;
         }
     }
+    // if there is no response, the node has not started bootstrapping
     if response.status().is_success() {
         let response_node: serde_json::value::Value =
             serde_json::from_str(&response.text()?).expect("JSON was not well-formatted");
