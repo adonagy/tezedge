@@ -31,11 +31,11 @@ impl fmt::Display for NodeType {
 
 #[test]
 fn test_heads() {
-    // wait_to_bootsrapp();
-    create_monitor_node_thread(NodeType::Tezedge)
-        .join()
-        .unwrap();
-    create_monitor_node_thread(NodeType::Ocaml).join().unwrap();
+    wait_to_bootsrapp();
+    // create_monitor_node_thread(NodeType::Tezedge)
+    //     .join()
+    //     .unwrap();
+    // create_monitor_node_thread(NodeType::Ocaml).join().unwrap();
     println!("Good!");
 
     // let rust_head = match get_head(NodeType::Tezedge) {
@@ -63,8 +63,8 @@ fn test_first_1k_heads() {
     let mut next_block = "BM9xFVaVv6mi7ckPbTgxEe7TStcfFmteJCpafUZcn75qi2wAHrC".to_string(); // 1000th
 
     while next_block != "" {
-        let ocaml_json = get_block(&next_block).expect("Failed to get block");
-        let tezedge_json = get_block(&next_block).expect("Failed to get block");
+        let ocaml_json = get_block(NodeType::Ocaml, &next_block).expect("Failed to get block");
+        let tezedge_json = get_block(NodeType::Tezedge, &next_block).expect("Failed to get block");
         let predecessor = ocaml_json["header"]["predecessor"]
             .to_string()
             .replace("\"", "");
@@ -72,6 +72,13 @@ fn test_first_1k_heads() {
         // NOTE: this will allways fail for now due to unimplemented properties in tezedge
         // to verify the loop, we just print the next block to be checked
         //assert_json_eq!(tezedge_json, ocaml_json);
+
+        // debug: remove later
+        if predecessor == "BLockGenesisGenesisGenesisGenesisGenesisd1f7bcGMoXy" {
+            println!("{}", &next_block);
+            break;
+        }
+
         next_block = predecessor;
         // TODO: remove this line
         println!("{}", &next_block);
@@ -164,12 +171,26 @@ fn is_bootstrapped(node: &NodeType) -> Result<String, reqwest::Error> {
     }
 }
 
-fn get_block(block_id: &String) -> Result<serde_json::value::Value, serde_json::error::Error> {
-    let url = format!(
-        "{}{}",
-        "http://ocaml-node-run:8732/chains/main/blocks/",
-        block_id.replace("\"", "")
-    );
+fn get_block(
+    node: NodeType,
+    block_id: &String,
+) -> Result<serde_json::value::Value, serde_json::error::Error> {
+    // let url = format!(
+    //     "{}{}",
+    //     "http://ocaml-node-run:8732/chains/main/blocks/",
+    //     block_id.replace("\"", "")
+    // );
+
+    let url = match node {
+        NodeType::Ocaml => format!(
+            "http://ocaml-node-run:8732/chains/main/blocks/{}",
+            block_id.replace("\"", "")
+        ), // reference Ocaml node
+        NodeType::Tezedge => format!(
+            "http://tezedge-node-run:18732/chains/main/blocks/{}",
+            block_id.replace("\"", "")
+        ), // Tezedge node
+    };
 
     let res = match reqwest::blocking::get(&url) {
         Ok(v) => v,
