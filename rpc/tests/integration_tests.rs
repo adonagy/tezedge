@@ -17,6 +17,7 @@ struct Bootstrapped {
     timestamp: String,
 }
 
+use chrono::{DateTime, Utc};
 use std::thread;
 use std::time::Duration;
 
@@ -64,11 +65,15 @@ fn wait_to_bootsrapp() {
     let bootstrap_monitoring_thread = thread::spawn(|| loop {
         match is_bootstrapped() {
             Ok(s) => {
-                if s == "BM9xFVaVv6mi7ckPbTgxEe7TStcfFmteJCpafUZcn75qi2wAHrC" {
+                let desired_timestamp =
+                    DateTime::parse_from_rfc3339("2019-09-28T08:14:24Z").unwrap();
+                let block_timestamp = DateTime::parse_from_rfc3339(&s).unwrap();
+
+                if block_timestamp >= desired_timestamp {
                     println!("Done Bootstrapping");
                     break;
                 } else {
-                    println!("Bootstrapping . . . block: {}", s);
+                    println!("Bootstrapping . . . timestamp: {}", s);
                     thread::sleep(Duration::from_secs(10));
                 }
             }
@@ -94,7 +99,10 @@ fn is_bootstrapped() -> Result<String, reqwest::Error> {
     } else {
         let response_node: Bootstrapped =
             serde_json::from_str(&response).expect("JSON was not well-formatted");
-        Ok(response_node.block.to_string())
+
+        // parse timestamp to int form request
+        // let datetime_node = DateTime::parse_from_rfc3339(&response_node.timestamp.to_string()).unwrap();
+        Ok(response_node.timestamp.to_string())
     }
 }
 
