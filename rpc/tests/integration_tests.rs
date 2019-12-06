@@ -136,14 +136,13 @@ fn is_bootstrapped(node: &NodeType) -> Result<String, reqwest::Error> {
                 reqwest::blocking::get("http://ocaml-node-run:8732/chains/main/blocks/head")?;
         }
     }
-    // hack to handle case when the node did not start the bootstrapping process and retruns timestamp with int 0
     if response.status().is_success() {
         let response_node: serde_json::value::Value =
             serde_json::from_str(&response.text()?).expect("JSON was not well-formatted");
 
         // parse timestamp to int form request
         // let datetime_node = DateTime::parse_from_rfc3339(&response_node.timestamp.to_string()).unwrap();
-        Ok(response_node["timestamp"].to_string())
+        Ok(response_node["timestamp"].to_string().replace("\"", ""))
     } else {
         Ok(String::new())
     }
