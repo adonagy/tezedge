@@ -18,9 +18,16 @@ struct Bootstrapped {
 }
 
 use chrono::{DateTime, Utc};
+use std::fmt;
 use std::thread;
 use std::thread::JoinHandle;
 use std::time::Duration;
+
+impl fmt::Display for NodeType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
 
 #[test]
 fn test_heads() {
@@ -86,20 +93,28 @@ fn create_monitor_node_thread(node: NodeType) -> JoinHandle<()> {
                     let block_timestamp = DateTime::parse_from_rfc3339(&s).unwrap();
 
                     if block_timestamp >= desired_timestamp {
-                        println!("Done Bootstrapping");
+                        println!("[{}] Done Bootstrapping", node.to_string());
                         break;
                     } else {
-                        println!("Bootstrapping . . . timestamp: {}", s);
+                        println!(
+                            "[{}] Bootstrapping . . . timestamp: {}",
+                            node.to_string(),
+                            s
+                        );
                         thread::sleep(Duration::from_secs(10));
                     }
                 } else {
-                    println!("Waiting for node to start bootstrapping...");
+                    println!(
+                        "[{}] Waiting for node to start bootstrapping...",
+                        node.to_string()
+                    );
                     thread::sleep(Duration::from_secs(10));
                 }
             }
-            Err(e) => {
-                panic!("Error in bootstrap check: {}", e);
-                // thread::sleep(Duration::from_secs(10));
+            Err(_e) => {
+                // panic!("Error in bootstrap check: {}", e);
+                println!("[{}] Waiting for node to run", node.to_string());
+                thread::sleep(Duration::from_secs(10));
             }
         }
     });
