@@ -128,6 +128,7 @@ fn create_monitor_node_thread(node: NodeType) -> JoinHandle<()> {
                 thread::sleep(Duration::from_secs(10));
             }
         }
+        println!("[{}] Loop cycel ending", node.to_string());
     });
     bootstrap_monitoring_thread
 }
