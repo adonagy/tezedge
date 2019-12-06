@@ -23,11 +23,11 @@ impl fmt::Display for NodeType {
 
 #[test]
 fn test_heads() {
-    //wait_to_bootsrapp();
-    create_monitor_node_thread(NodeType::Tezedge)
-        .join()
-        .unwrap();
-    create_monitor_node_thread(NodeType::Ocaml).join().unwrap();
+    wait_to_bootsrapp();
+    // create_monitor_node_thread(NodeType::Tezedge)
+    //     .join()
+    //     .unwrap();
+    // create_monitor_node_thread(NodeType::Ocaml).join().unwrap();
 
     test_first_1k_heads();
 }
@@ -39,8 +39,10 @@ fn test_first_1k_heads() {
     let mut next_block = "BM9xFVaVv6mi7ckPbTgxEe7TStcfFmteJCpafUZcn75qi2wAHrC".to_string(); // 1000th
 
     while next_block != "" {
-        let ocaml_json = get_block(NodeType::Ocaml, &next_block).expect("Failed to get block");
-        let tezedge_json = get_block(NodeType::Tezedge, &next_block).expect("Failed to get block");
+        let ocaml_json =
+            get_block(NodeType::Ocaml, &next_block).expect("Failed to get block from ocaml");
+        let tezedge_json =
+            get_block(NodeType::Tezedge, &next_block).expect("Failed to get block from tezedge");
         let predecessor = ocaml_json["header"]["predecessor"]
             .to_string()
             .replace("\"", "");
@@ -49,15 +51,15 @@ fn test_first_1k_heads() {
         // to verify the loop, we just print the next block to be checked
         //assert_json_eq!(tezedge_json, ocaml_json);
 
+        // TODO: remove this line
+        println!("{}", &next_block);
+
         // debug: remove later
         if next_block == "BLockGenesisGenesisGenesisGenesisGenesisd1f7bcGMoXy" {
             println!("Genesis block reached and checked, breaking loop...");
             break;
         }
-
         next_block = predecessor;
-        // TODO: remove this line
-        println!("{}", &next_block);
     }
 }
 
