@@ -88,10 +88,14 @@ fn is_bootstrapped() -> Result<String, reqwest::Error> {
     let response: String =
         reqwest::blocking::get("http://tezedge-node-run:18732/monitor/bootstrapped")?.text()?;
 
-    let response_node: Bootstrapped =
-        serde_json::from_str(&response).expect("JSON was not well-formatted");
-
-    Ok(response_node.block.to_string())
+    // hack to handle case when the node did not start the bootstrapping process and retruns timestamp with int 0
+    if response.contains("\"timestamp\": 0") {
+        Ok(String::new())
+    } else {
+        let response_node: Bootstrapped =
+            serde_json::from_str(&response).expect("JSON was not well-formatted");
+        Ok(response_node.block.to_string())
+    }
 }
 
 fn get_block(block_id: &String) -> Result<serde_json::value::Value, serde_json::error::Error> {
