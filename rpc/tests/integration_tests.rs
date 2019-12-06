@@ -3,21 +3,13 @@ extern crate assert_json_diff;
 extern crate reqwest;
 extern crate serde;
 
-use serde::Deserialize;
-
 #[derive(Debug)]
 pub enum NodeType {
     Tezedge,
     Ocaml,
 }
 
-// #[derive(Debug, Deserialize)]
-// struct Bootstrapped {
-//     block: String,
-//     timestamp: String,
-// }
-
-use chrono::{DateTime, Utc};
+use chrono::DateTime;
 use std::fmt;
 use std::thread;
 use std::thread::JoinHandle;
@@ -36,24 +28,8 @@ fn test_heads() {
         .join()
         .unwrap();
     create_monitor_node_thread(NodeType::Ocaml).join().unwrap();
-    println!("Good!");
 
-    // let rust_head = match get_head(NodeType::Tezedge) {
-    //     Ok(v) => v,
-    //     Err(e) => panic!("Invalid json: {}", e),
-    // };
     test_first_1k_heads();
-
-    // let block_id: String = rust_head["hash"].to_string();
-
-    // let ocaml_block = match get_block(&block_id) {
-    //     Ok(v) => v,
-    //     Err(e) => panic!("Invalid json: {}", e),
-    // };
-
-    // // TODO: make it more obvious in the output
-    // //              actual      expected
-    // assert_json_eq!(rust_head, ocaml_block);
 }
 
 fn test_first_1k_heads() {
@@ -75,7 +51,7 @@ fn test_first_1k_heads() {
 
         // debug: remove later
         if next_block == "BLockGenesisGenesisGenesisGenesisGenesisd1f7bcGMoXy" {
-            println!("{}", &next_block);
+            println!("Genesis block reached and checked, breaking loop...");
             break;
         }
 
@@ -86,21 +62,11 @@ fn test_first_1k_heads() {
 }
 
 fn wait_to_bootsrapp() {
-    // let connect_thread = thread::spawn(|| loop {
-    //     let resp = reqwest::blocking::get("http://tezedge-node-run:18732/monitor/bootstrapped");
-    //     if resp.unwrap().status().is_success() {
-    //         break;
-    //     } else {
-    //         thread::sleep(Duration::from_secs(10));
-    //     }
-    // });
-    // connect_thread.join();
     let bootstrapping_tezedge = create_monitor_node_thread(NodeType::Tezedge);
     let bootstrapping_ocaml = create_monitor_node_thread(NodeType::Ocaml);
 
     bootstrapping_tezedge.join().unwrap();
     bootstrapping_ocaml.join().unwrap();
-    println!("Bootstrapping threads exited successfully!");
 }
 
 fn create_monitor_node_thread(node: NodeType) -> JoinHandle<()> {
@@ -161,8 +127,6 @@ fn is_bootstrapped(node: &NodeType) -> Result<String, reqwest::Error> {
         let response_node: serde_json::value::Value =
             serde_json::from_str(&response.text()?).expect("JSON was not well-formatted");
 
-        // parse timestamp to int form request
-        // let datetime_node = DateTime::parse_from_rfc3339(&response_node.timestamp.to_string()).unwrap();
         Ok(response_node["header"]["timestamp"]
             .to_string()
             .replace("\"", ""))
@@ -175,12 +139,6 @@ fn get_block(
     node: NodeType,
     block_id: &String,
 ) -> Result<serde_json::value::Value, serde_json::error::Error> {
-    // let url = format!(
-    //     "{}{}",
-    //     "http://ocaml-node-run:8732/chains/main/blocks/",
-    //     block_id.replace("\"", "")
-    // );
-
     let url = match node {
         NodeType::Ocaml => format!(
             "http://ocaml-node-run:8732/chains/main/blocks/{}",
@@ -196,24 +154,6 @@ fn get_block(
         Ok(v) => v,
         Err(e) => panic!("Request for getting block failed: {}", e),
     };
-    //let mut body = String::new();
-    //res.read_to_string(&mut body);
-
-    serde_json::from_str(&res.text().unwrap())
-}
-
-fn get_head(node_type: NodeType) -> Result<serde_json::value::Value, serde_json::error::Error> {
-    let url = match node_type {
-        NodeType::Ocaml => "http://ocaml-node-run:8732/chains/main/blocks/head", // reference Ocaml node
-        NodeType::Tezedge => "http://tezedge-node-run:18732/chains/main/blocks/head", // locally built Tezedge node
-    };
-
-    let res = match reqwest::blocking::get(url) {
-        Ok(v) => v,
-        Err(e) => panic!("Request for getting block failed: {}", e),
-    };
-    //let mut body = String::new();
-    //res.read_to_string(&mut body);
 
     serde_json::from_str(&res.text().unwrap())
 }
