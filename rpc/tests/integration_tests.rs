@@ -31,7 +31,11 @@ impl fmt::Display for NodeType {
 
 #[test]
 fn test_heads() {
-    wait_to_bootsrapp();
+    // wait_to_bootsrapp();
+    create_monitor_node_thread(NodeType::Tezedge)
+        .join()
+        .unwrap();
+    create_monitor_node_thread(NodeType::Ocaml).join().unwrap();
     println!("Good!");
 
     // let rust_head = match get_head(NodeType::Tezedge) {
