@@ -125,29 +125,27 @@ fn create_monitor_node_thread(node: NodeType) -> JoinHandle<()> {
 
 #[allow(dead_code)]
 fn is_bootstrapped(node: &NodeType) -> Result<String, reqwest::Error> {
-    let response: String;
+    let response;
     match node {
         NodeType::Tezedge => {
             response =
-                reqwest::blocking::get("http://tezedge-node-run:18732/chains/main/blocks/head")?
-                    .text()?
+                reqwest::blocking::get("http://tezedge-node-run:18732/chains/main/blocks/head")?;
         }
         NodeType::Ocaml => {
-            response = reqwest::blocking::get("http://ocaml-node-run:8732/chains/main/blocks/head")?
-                .text()?
+            response =
+                reqwest::blocking::get("http://ocaml-node-run:8732/chains/main/blocks/head")?;
         }
     }
-
     // hack to handle case when the node did not start the bootstrapping process and retruns timestamp with int 0
-    if response.contains(r#""timestamp":0"#) {
-        Ok(String::new())
-    } else {
+    if response.status().is_success() {
         let response_node: serde_json::value::Value =
-            serde_json::from_str(&response).expect("JSON was not well-formatted");
+            serde_json::from_str(&response.text()?).expect("JSON was not well-formatted");
 
         // parse timestamp to int form request
         // let datetime_node = DateTime::parse_from_rfc3339(&response_node.timestamp.to_string()).unwrap();
         Ok(response_node["timestamp"].to_string())
+    } else {
+        Ok(String::new())
     }
 }
 
