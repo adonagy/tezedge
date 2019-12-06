@@ -1,5 +1,5 @@
-// #[macro_use]
-// extern crate assert_json_diff;
+#[macro_use]
+extern crate assert_json_diff;
 extern crate reqwest;
 extern crate serde;
 
@@ -32,12 +32,13 @@ impl fmt::Display for NodeType {
 #[test]
 fn test_heads() {
     wait_to_bootsrapp();
-    println!("Good!")
+    println!("Good!");
 
     // let rust_head = match get_head(NodeType::Tezedge) {
     //     Ok(v) => v,
     //     Err(e) => panic!("Invalid json: {}", e),
     // };
+    test_first_1k_heads();
 
     // let block_id: String = rust_head["hash"].to_string();
 
@@ -51,14 +52,28 @@ fn test_heads() {
     // assert_json_eq!(rust_head, ocaml_block);
 }
 
-// #[test]
-// fn test_first_1k_heads() {
-//     // should we use recursion?
-//     // TODO: test recursion
+//#[test]
+fn test_first_1k_heads() {
+    // should we use recursion?
+    // TODO: test recursion
 
-//     let next_block = "BM9xFVaVv6mi7ckPbTgxEe7TStcfFmteJCpafUZcn75qi2wAHrC"; // 1000th
+    let mut next_block = "BM9xFVaVv6mi7ckPbTgxEe7TStcfFmteJCpafUZcn75qi2wAHrC".to_string(); // 1000th
 
-// }
+    while next_block != "" {
+        let ocaml_json = get_block(&next_block).expect("Failed to get block");
+        let tezedge_json = get_block(&next_block).expect("Failed to get block");
+        let predecessor = ocaml_json["header"]["predecessor"]
+            .to_string()
+            .replace("\"", "");
+
+        // NOTE: this will allways fail for now due to unimplemented properties in tezedge
+        // to verify the loop, we just print the next block to be checked
+        //assert_json_eq!(tezedge_json, ocaml_json);
+        next_block = predecessor;
+        // TODO: remove this line
+        println!("{}", &next_block);
+    }
+}
 
 fn wait_to_bootsrapp() {
     // let connect_thread = thread::spawn(|| loop {
