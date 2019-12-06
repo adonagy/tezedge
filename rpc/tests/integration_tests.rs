@@ -142,7 +142,9 @@ fn is_bootstrapped(node: &NodeType) -> Result<String, reqwest::Error> {
 
         // parse timestamp to int form request
         // let datetime_node = DateTime::parse_from_rfc3339(&response_node.timestamp.to_string()).unwrap();
-        Ok(response_node["timestamp"].to_string().replace("\"", ""))
+        Ok(response_node["header"]["timestamp"]
+            .to_string()
+            .replace("\"", ""))
     } else {
         Ok(String::new())
     }
