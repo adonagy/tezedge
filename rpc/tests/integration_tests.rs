@@ -50,6 +50,8 @@ fn test_first_1k_heads() {
             .replace("\"", "");
 
         // NOTE: this will allways fail for now due to unimplemented properties in tezedge
+        // print the asserted block, to know which one errored in case of an error
+        println!("Checking: {}", &next_block);
         assert_json_eq!(tezedge_json, ocaml_json);
 
         // TODO: remove this line
