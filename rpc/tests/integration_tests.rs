@@ -11,11 +11,11 @@ pub enum NodeType {
     Ocaml,
 }
 
-#[derive(Debug, Deserialize)]
-struct Bootstrapped {
-    block: String,
-    timestamp: String,
-}
+// #[derive(Debug, Deserialize)]
+// struct Bootstrapped {
+//     block: String,
+//     timestamp: String,
+// }
 
 use chrono::{DateTime, Utc};
 use std::fmt;
@@ -128,12 +128,13 @@ fn is_bootstrapped(node: &NodeType) -> Result<String, reqwest::Error> {
     let response: String;
     match node {
         NodeType::Tezedge => {
-            response = reqwest::blocking::get("http://tezedge-node-run:18732/monitor/bootstrapped")?
-                .text()?
+            response =
+                reqwest::blocking::get("http://tezedge-node-run:18732/chains/main/blocks/head")?
+                    .text()?
         }
         NodeType::Ocaml => {
-            response =
-                reqwest::blocking::get("http://ocaml-node-run:8732/monitor/bootstrapped")?.text()?
+            response = reqwest::blocking::get("http://ocaml-node-run:8732/chains/main/blocks/head")?
+                .text()?
         }
     }
 
@@ -141,12 +142,12 @@ fn is_bootstrapped(node: &NodeType) -> Result<String, reqwest::Error> {
     if response.contains(r#""timestamp":0"#) {
         Ok(String::new())
     } else {
-        let response_node: Bootstrapped =
+        let response_node: serde_json::value::Value =
             serde_json::from_str(&response).expect("JSON was not well-formatted");
 
         // parse timestamp to int form request
         // let datetime_node = DateTime::parse_from_rfc3339(&response_node.timestamp.to_string()).unwrap();
-        Ok(response_node.timestamp.to_string())
+        Ok(response_node["timestamp"].to_string())
     }
 }
 
