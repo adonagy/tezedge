@@ -24,7 +24,6 @@ steps:
     OCAML_BUILD_CHAIN: remote
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
   commands: 
-    - cargo build --release
     - mkdir /tmp/tezedge
     - cargo run --release --bin light-node -- --config-file ./light_node/etc/tezedge/tezedge.config --protocol-runner "./target/release/protocol-runner" --p2p-port 19733
 
