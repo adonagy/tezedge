@@ -52,7 +52,6 @@ fn test_heads() {
     // assert_json_eq!(rust_head, ocaml_block);
 }
 
-//#[test]
 fn test_first_1k_heads() {
     // should we use recursion?
     // TODO: test recursion
@@ -88,14 +87,9 @@ fn wait_to_bootsrapp() {
     let bootstrapping_tezedge = create_monitor_node_thread(NodeType::Tezedge);
     let bootstrapping_ocaml = create_monitor_node_thread(NodeType::Ocaml);
 
-    bootstrapping_tezedge
-        .join()
-        .expect("Tezedge bootstrap monitoring thread failed to join");
-    bootstrapping_ocaml
-        .join()
-        .expect("Ocaml bootstrap monitoring thread failed to join");
-
-    //bootstrap_monitoring_thread.join();
+    bootstrapping_tezedge.join().unwrap();
+    bootstrapping_ocaml.join().unwrap();
+    println!("Bootstrapping threads exited successfully!");
 }
 
 fn create_monitor_node_thread(node: NodeType) -> JoinHandle<()> {
