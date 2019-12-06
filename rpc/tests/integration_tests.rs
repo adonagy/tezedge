@@ -19,6 +19,7 @@ struct Bootstrapped {
 
 use chrono::{DateTime, Utc};
 use std::thread;
+use std::thread::JoinHandle;
 use std::time::Duration;
 
 #[test]
@@ -53,17 +54,31 @@ fn test_heads() {
 // }
 
 fn wait_to_bootsrapp() {
-    let connect_thread = thread::spawn(|| loop {
-        let resp = reqwest::blocking::get("http://tezedge-node-run:18732/monitor/bootstrapped");
-        if resp.unwrap().status().is_success() {
-            break;
-        } else {
-            thread::sleep(Duration::from_secs(10));
-        }
-    });
+    // let connect_thread = thread::spawn(|| loop {
+    //     let resp = reqwest::blocking::get("http://tezedge-node-run:18732/monitor/bootstrapped");
+    //     if resp.unwrap().status().is_success() {
+    //         break;
+    //     } else {
+    //         thread::sleep(Duration::from_secs(10));
+    //     }
+    // });
+    // connect_thread.join();
+    let bootstrapping_tezedge = create_monitor_node_thread(NodeType::Tezedge);
+    let bootstrapping_ocaml = create_monitor_node_thread(NodeType::Ocaml);
 
-    let bootstrap_monitoring_thread = thread::spawn(|| loop {
-        match is_bootstrapped() {
+    bootstrapping_tezedge
+        .join()
+        .expect("Tezedge bootstrap monitoring thread failed to join");
+    bootstrapping_ocaml
+        .join()
+        .expect("Ocaml bootstrap monitoring thread failed to join");
+
+    //bootstrap_monitoring_thread.join();
+}
+
+fn create_monitor_node_thread(node: NodeType) -> JoinHandle<()> {
+    let bootstrap_monitoring_thread = thread::spawn(move || loop {
+        match is_bootstrapped(&node) {
             Ok(s) => {
                 if s != "" {
                     let desired_timestamp =
@@ -83,20 +98,27 @@ fn wait_to_bootsrapp() {
                 }
             }
             Err(e) => {
-                println!("Error in bootstrap check: {}", e);
-                thread::sleep(Duration::from_secs(10));
+                panic!("Error in bootstrap check: {}", e);
+                // thread::sleep(Duration::from_secs(10));
             }
         }
     });
-
-    connect_thread.join();
-    bootstrap_monitoring_thread.join();
+    bootstrap_monitoring_thread
 }
 
 #[allow(dead_code)]
-fn is_bootstrapped() -> Result<String, reqwest::Error> {
-    let response: String =
-        reqwest::blocking::get("http://tezedge-node-run:18732/monitor/bootstrapped")?.text()?;
+fn is_bootstrapped(node: &NodeType) -> Result<String, reqwest::Error> {
+    let response: String;
+    match node {
+        NodeType::Tezedge => {
+            response = reqwest::blocking::get("http://tezedge-node-run:18732/monitor/bootstrapped")?
+                .text()?
+        }
+        NodeType::Ocaml => {
+            response =
+                reqwest::blocking::get("http://ocaml-node-run:8732/monitor/bootstrapped")?.text()?
+        }
+    }
 
     // hack to handle case when the node did not start the bootstrapping process and retruns timestamp with int 0
     if response.contains(r#""timestamp":0"#) {
