@@ -52,6 +52,10 @@ steps:
     - tezos-node identity generate
     - tezos-node run --rpc-addr 0.0.0.0
 
+- name: bootstrapping
+  image: adonagy/tezos-node-bootstrap:latest
+  
+
 - name: test
   image: adonagy/tezedge-ci-builder:latest
   pull: if-not-exists

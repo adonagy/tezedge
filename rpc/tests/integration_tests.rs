@@ -25,16 +25,6 @@ impl fmt::Display for NodeType {
 
 #[test]
 fn test_heads() {
-    wait_to_bootsrapp();
-    // create_monitor_node_thread(NodeType::Tezedge)
-    //     .join()
-    //     .unwrap();
-    // create_monitor_node_thread(NodeType::Ocaml).join().unwrap();
-
-    test_first_1k_heads();
-}
-
-fn test_first_1k_heads() {
     // should we use recursion?
     // TODO: test recursion
 
@@ -63,83 +53,6 @@ fn test_first_1k_heads() {
             break;
         }
         next_block = predecessor;
-    }
-}
-
-fn wait_to_bootsrapp() {
-    let bootstrapping_tezedge = create_monitor_node_thread(NodeType::Tezedge);
-    let bootstrapping_ocaml = create_monitor_node_thread(NodeType::Ocaml);
-
-    bootstrapping_tezedge.join().unwrap();
-    bootstrapping_ocaml.join().unwrap();
-}
-
-fn create_monitor_node_thread(node: NodeType) -> JoinHandle<()> {
-    let bootstrap_monitoring_thread = thread::spawn(move || loop {
-        match is_bootstrapped(&node) {
-            Ok(s) => {
-                // empty string means, the rpc server is running, but the bootstraping has not started yet
-                if s != "" {
-                    let desired_timestamp =
-                        DateTime::parse_from_rfc3339("2019-09-28T08:14:24Z").unwrap();
-                    let block_timestamp = DateTime::parse_from_rfc3339(&s).unwrap();
-
-                    if block_timestamp >= desired_timestamp {
-                        println!("[{}] Done Bootstrapping", node.to_string());
-                        break;
-                    } else {
-                        println!(
-                            "[{}] Bootstrapping . . . timestamp: {}",
-                            node.to_string(),
-                            s
-                        );
-                        thread::sleep(Duration::from_secs(10));
-                    }
-                } else {
-                    println!(
-                        "[{}] Waiting for node to start bootstrapping...",
-                        node.to_string()
-                    );
-                    thread::sleep(Duration::from_secs(10));
-                }
-            }
-            Err(_e) => {
-                // panic!("Error in bootstrap check: {}", e);
-                // NOTE: This should be handled more carefully
-                println!("[{}] Waiting for node to run", node.to_string());
-                println!("[{}] Error: {}", node.to_string(), _e);
-
-                thread::sleep(Duration::from_secs(10));
-            }
-        }
-        println!("[{}] Loop cycel ending", node.to_string());
-    });
-    bootstrap_monitoring_thread
-}
-
-#[allow(dead_code)]
-fn is_bootstrapped(node: &NodeType) -> Result<String, reqwest::Error> {
-    let response;
-    match node {
-        NodeType::Tezedge => {
-            response =
-                reqwest::blocking::get("http://tezedge-node-run:18732/chains/main/blocks/head")?;
-        }
-        NodeType::Ocaml => {
-            response =
-                reqwest::blocking::get("http://ocaml-node-run:8732/chains/main/blocks/head")?;
-        }
-    }
-    // if there is no response, the node has not started bootstrapping
-    if response.status().is_success() {
-        let response_node: serde_json::value::Value =
-            serde_json::from_str(&response.text()?).expect("JSON was not well-formatted");
-
-        Ok(response_node["header"]["timestamp"]
-            .to_string()
-            .replace("\"", ""))
-    } else {
-        Ok(String::new())
     }
 }
 
