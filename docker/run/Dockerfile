@@ -3,6 +3,8 @@ FROM simplestakingcom/tezos-opam-builder:debian10
 # Checkout and compile tezedge source code
 ARG rust_toolchain="nightly-2019-12-05"
 RUN curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain ${rust_toolchain} -y
+# TODO: remove, or move somewhere else
+RUN apt-get update && apt-get install libssl-dev        
 ENV PATH=/home/appuser/.cargo/bin:$PATH
 ENV RUST_BACKTRACE=1
 ENV SODIUM_USE_PKG_CONFIG=1
