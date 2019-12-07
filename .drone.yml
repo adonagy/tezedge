@@ -24,7 +24,7 @@ steps:
     password:
       from_secret: dockerhub_token
     repo: adonagy/tezedge
-    dockerfile: docker/run
+    dockerfile: /drone/src/docker/run/Dockerfile
     tags: latest
 
 - name: tezedge-node-run
