@@ -49,7 +49,7 @@ steps:
   detach: true
   commands:
     - tezos-node identity generate
-    - tezos-node run --rpc-addr 0.0.0.0
+    - tezos-node run --rpc-addr 0.0.0.0 --net-addr 0.0.0.0:9734
 
 - name: bootstrapping
   image: adonagy/tezos-node-bootstrap:latest
