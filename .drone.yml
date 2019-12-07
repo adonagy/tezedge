@@ -16,15 +16,17 @@ steps:
 
 # after the build step is successfull, build a container to be used in the next steps
 - name: build-tezedge-image
-  image: docker
-  volumes: 
-  - name: dockersock
-    path: /var/run/docker.sock
-  commands:
-    - docker build -t tezedge:latest docker/run
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: dockerhub_username
+    password:
+      from_secret: dockerhub_token
+    repo: adonagy/tezedge
+    tags: latest
 
 - name: tezedge-node-run
-  image: tezedge:latest
+  image: adonagy/tezedge:latest
   pull: if-not-exists
   detach: true
 
@@ -55,8 +57,3 @@ steps:
   commands:
     - sleep 5
     - cargo test --release test_heads
-
-volumes:
-- name: dockersock
-  host:
-    path: /var/run/docker.sock
