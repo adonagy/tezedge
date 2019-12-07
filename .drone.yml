@@ -12,6 +12,7 @@ steps:
     OCAML_BUILD_CHAIN: remote
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
   commands:
+    - pwd
     - cargo clean && cargo build --release
 
 # after the build step is successfull, build a container to be used in the next steps
