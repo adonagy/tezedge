@@ -29,7 +29,6 @@ steps:
 
 - name: tezedge-node-run
   image: adonagy/tezedge:latest
-  pull: if-not-exists
   detach: true
 
 # - name: tezedge-node-run
@@ -54,7 +53,7 @@ steps:
 
 - name: bootstrapping
   image: adonagy/tezos-node-bootstrap:latest
-  
+
 
 - name: test
   image: adonagy/tezedge-ci-builder:latest
