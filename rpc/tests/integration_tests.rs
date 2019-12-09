@@ -49,11 +49,11 @@ fn integration_tests_rpc(start_block: &str) {
         // ---------------------- Please keep one function per test ----------------------
 
         test_rpc_compare_json(&format!("{}/{}", "chains/main/blocks", &prev_block));
-        test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", &prev_block, "helpers/baking_rights"));
-        test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", &prev_block, "helpers/endorsing_rights"));
-        test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", &prev_block, "context/constants"));
+        //test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", &prev_block, "helpers/baking_rights"));
+        //test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", &prev_block, "helpers/endorsing_rights"));
+        //test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", &prev_block, "context/constants"));
         // not sure about cycles probably need to be more specific test to loop over all possible cycles
-        test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", &prev_block, "context/raw/json/cycle/0"));
+        //test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", &prev_block, "context/raw/json/cycle/0"));
 
         // --------------------------------- End of tests --------------------------------
 
@@ -78,8 +78,8 @@ fn get_rpc_as_json(node: NodeType, rpc_path: &str) -> Result<serde_json::value::
             rpc_path
         ), // reference Ocaml node
         NodeType::Tezedge => format!(
-            //"http://tezedge-node-run:18732/chains/main/blocks/{}",
-            "http://ocaml-node-run:8732/{}", // POW that tests are OK
+            "http://tezedge-node-run:18732/{}",
+            //"http://ocaml-node-run:8732/{}", // POW that tests are OK
             //"http://127.0.0.1:18732/{}", //swith for local testing
             rpc_path
         ), // Tezedge node
