@@ -48,8 +48,9 @@ steps:
   image: tezos/tezos:babylonnet
   detach: true
   commands:
-    - tezos-node identity generate
-    - tezos-node run --rpc-addr 0.0.0.0 --net-addr 0.0.0.0:9734
+    - mkdir data
+    - cp /drone/src/docker/identities/identity_ocaml.json ./data/identity.json
+    - tezos-node run --rpc-addr 0.0.0.0 --net-addr 0.0.0.0:9734 --data-dir ./data
 
 - name: bootstrapping
   image: adonagy/tezos-node-bootstrap:latest
