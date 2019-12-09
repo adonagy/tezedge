@@ -50,7 +50,7 @@ steps:
   commands:
     - mkdir /home/tezos/data
     - cp /drone/src/docker/identities/identity_ocaml.json /home/tezos/data/identity.json
-    - tezos-node run --rpc-addr 0.0.0.0 --net-addr 0.0.0.0:9734 --data-dir /home/tezos/data --hitory-mode archive
+    - tezos-node run --rpc-addr 0.0.0.0 --net-addr 0.0.0.0:9734 --data-dir /home/tezos/data --history-mode archive
 
 # # build devel build and build test libs from [dev-dependencies]
 # - name: build-tezedge-devel
