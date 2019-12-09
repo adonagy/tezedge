@@ -3,19 +3,19 @@ kind: pipeline
 name: default
 
 steps:
-# - name: build-tezedge
-#   image: adonagy/tezedge-ci-builder:latest
-#   user: root
-#   environment:
-#     RUST_BACKTRACE: 1
-#     SODIUM_USE_PKG_CONFIG: 1
-#     OCAML_BUILD_CHAIN: remote
-#     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
-#   commands:
-#     - pwd
-#     - cargo clean && cargo build --release
+- name: build-tezedge
+  image: adonagy/tezedge-ci-builder:latest
+  user: root
+  environment:
+    RUST_BACKTRACE: 1
+    SODIUM_USE_PKG_CONFIG: 1
+    OCAML_BUILD_CHAIN: remote
+    LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
+  commands:
+    - pwd
+    - cargo clean && cargo build --release
 
-# # after the build step is successfull, build a container to be used in the next steps
+# build a container to be used in the next steps
 # - name: build-tezedge-image
 #   image: plugins/docker
 #   settings:
@@ -31,18 +31,18 @@ steps:
 #   image: adonagy/tezedge:latest
 #   detach: true
 
-# - name: tezedge-node-run
-#   image: adonagy/tezedge-ci-builder:latest
-#   user: root
-#   detach: true
-#   environment:
-#     RUST_BACKTRACE: 1
-#     SODIUM_USE_PKG_CONFIG: 1
-#     OCAML_BUILD_CHAIN: remote
-#     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
-#   commands: 
-#     - mkdir /tmp/tezedge
-#     - cargo run --release --bin light-node -- --config-file ./light_node/etc/tezedge/tezedge.config --protocol-runner "./target/release/protocol-runner" --p2p-port 19733
+- name: tezedge-node-run
+  image: adonagy/tezedge-ci-builder:latest
+  user: root
+  detach: true
+  environment:
+    RUST_BACKTRACE: 1
+    SODIUM_USE_PKG_CONFIG: 1
+    OCAML_BUILD_CHAIN: remote
+    LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
+  commands: 
+    - mkdir /tmp/tezedge
+    - cargo run --release --bin light-node -- --config-file ./light_node/etc/tezedge/tezedge.config --protocol-runner "./target/release/protocol-runner" --p2p-port 19733 --identity-file /drone/src/docker/identities/identity_tezedge.json
 
 - name: ocaml-node-run
   image: tezos/tezos:babylonnet
