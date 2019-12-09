@@ -73,13 +73,13 @@ fn test_rpc_compare_json(rpc_path: &str) {
 fn get_rpc_as_json(node: NodeType, rpc_path: &str) -> Result<serde_json::value::Value, serde_json::error::Error> {
     let url = match node {
         NodeType::Ocaml => format!(
-            "http://ocaml-node-run:8732/chains/main/blocks/{}",
+            "http://ocaml-node-run:8732/{}",
             //"http://127.0.0.1:8732/{}", //switch for local testing
             rpc_path
         ), // reference Ocaml node
         NodeType::Tezedge => format!(
             //"http://tezedge-node-run:18732/chains/main/blocks/{}",
-            "http://ocaml-node-run:8732/chains/main/blocks/{}", // POW that tests are OK
+            "http://ocaml-node-run:8732/{}", // POW that tests are OK
             //"http://127.0.0.1:18732/{}", //swith for local testing
             rpc_path
         ), // Tezedge node
