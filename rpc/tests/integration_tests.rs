@@ -31,6 +31,9 @@ fn test_heads() {
     let mut next_block = "BM9xFVaVv6mi7ckPbTgxEe7TStcfFmteJCpafUZcn75qi2wAHrC".to_string(); // 1000th
 
     while next_block != "" {
+        // print the asserted block, to know which one errored in case of an error
+        println!("Checking: {}", &next_block);
+        
         let ocaml_json =
             get_block(NodeType::Ocaml, &next_block).expect("Failed to get block from ocaml");
         let tezedge_json =
@@ -40,8 +43,6 @@ fn test_heads() {
             .replace("\"", "");
 
         // NOTE: this will allways fail for now due to unimplemented properties in tezedge
-        // print the asserted block, to know which one errored in case of an error
-        println!("Checking: {}", &next_block);
         //assert_json_eq!(tezedge_json, ocaml_json);
 
         // TODO: remove this line
