@@ -1,4 +1,5 @@
-// PoC, needs refactoring
+// Copyright (c) SimpleStaking and Tezedge Contributors
+// SPDX-License-Identifier: MIT
 
 #[macro_use]
 extern crate assert_json_diff;
@@ -11,63 +12,76 @@ pub enum NodeType {
     Ocaml,
 }
 
-use chrono::DateTime;
-use std::fmt;
-use std::thread;
-use std::thread::JoinHandle;
-use std::time::Duration;
-
-impl fmt::Display for NodeType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
+#[test]
+#[ignore]
+fn integration_test_full() {
+    // to execute test run 'cargo test --verbose -- --nocapture --ignored integration_test_full'
+    // start full test from level 125717
+    integration_tests_rpc("BM61Z4zsa8Vu3zF3CYcMa4ZHUfttmJ2eVUavLmC5Lfbnv2dq4Gw")
 }
 
 #[test]
-fn test_heads() {
-    // should we use recursion?
-    // TODO: test recursion
+#[ignore]
+fn integration_test_dev() {
+    // to execute test run 'cargo test --verbose -- --nocapture --ignored integration_test_dev'
+    // start development tests from 1000th block
+    integration_tests_rpc("BM9xFVaVv6mi7ckPbTgxEe7TStcfFmteJCpafUZcn75qi2wAHrC")
+}
 
-    let mut next_block = "BM9xFVaVv6mi7ckPbTgxEe7TStcfFmteJCpafUZcn75qi2wAHrC".to_string(); // 1000th
 
-    while next_block != "" {
-        let ocaml_json =
-            get_block(NodeType::Ocaml, &next_block).expect("Failed to get block from ocaml");
-        let tezedge_json =
-            get_block(NodeType::Tezedge, &next_block).expect("Failed to get block from tezedge");
-        let predecessor = ocaml_json["header"]["predecessor"]
+fn integration_tests_rpc(start_block: &str) {
+    let mut prev_block = start_block.to_string();
+    
+    while prev_block != "" {
+        println!("{}", &format!("{}/{}", "chains/main/blocks", &prev_block));
+        let block_json = get_rpc_as_json(NodeType::Ocaml, &format!("{}/{}", "chains/main/blocks", &prev_block))
+            .expect("Failed to get block from ocaml");
+        let predecessor = block_json["header"]["predecessor"]
             .to_string()
             .replace("\"", "");
-
-        // NOTE: this will allways fail for now due to unimplemented properties in tezedge
-        // print the asserted block, to know which one errored in case of an error
-        println!("Checking: {}", &next_block);
-        assert_json_eq!(tezedge_json, ocaml_json);
-
-        // TODO: remove this line
-
-        // debug: remove later
-        // NOTE: cannot get genesis block from node
-        if next_block == "BLockGenesisGenesisGenesisGenesisGenesisd1f7bcGMoXy" {
+        // Do not check genesys block
+        if prev_block == "BLockGenesisGenesisGenesisGenesisGenesisd1f7bcGMoXy" {
             println!("Genesis block reached and checked, breaking loop...");
             break;
         }
-        next_block = predecessor;
+
+        // -------------------------- Integration tests for RPC --------------------------
+        // ---------------------- Please keep one function per test ----------------------
+
+        test_rpc_compare_json(&format!("{}/{}", "chains/main/blocks", &prev_block));
+        test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", &prev_block, "helpers/baking_rights"));
+        test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", &prev_block, "helpers/endorsing_rights"));
+        test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", &prev_block, "context/constants"));
+        // not sure about cycles probably need to be more specific test to loop over all possible cycles
+        test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", &prev_block, "context/raw/json/cycle/0"));
+
+        // --------------------------------- End of tests --------------------------------
+
+        prev_block = predecessor;
     }
 }
 
-fn get_block(
-    node: NodeType,
-    block_id: &String,
-) -> Result<serde_json::value::Value, serde_json::error::Error> {
+fn test_rpc_compare_json(rpc_path: &str) {
+    // print the asserted path, to know which one errored in case of an error, use --nocapture
+    println!("Checking: {}", rpc_path); 
+    let ocaml_json = get_rpc_as_json(NodeType::Ocaml, rpc_path).unwrap();
+    let tezedge_json = get_rpc_as_json(NodeType::Tezedge, rpc_path).unwrap();
+    assert_json_eq!(tezedge_json, ocaml_json);
+}
+
+
+fn get_rpc_as_json(node: NodeType, rpc_path: &str) -> Result<serde_json::value::Value, serde_json::error::Error> {
     let url = match node {
         NodeType::Ocaml => format!(
             "http://ocaml-node-run:8732/chains/main/blocks/{}",
-            block_id.replace("\"", "")
+            //"http://127.0.0.1:8732/{}", //switch for local testing
+            rpc_path
         ), // reference Ocaml node
         NodeType::Tezedge => format!(
-            "http://tezedge-node-run:18732/chains/main/blocks/{}",
-            block_id.replace("\"", "")
+            //"http://tezedge-node-run:18732/chains/main/blocks/{}",
+            "http://ocaml-node-run:8732/chains/main/blocks/{}", // POW that tests are OK
+            //"http://127.0.0.1:18732/{}", //swith for local testing
+            rpc_path
         ), // Tezedge node
     };
 
