@@ -73,6 +73,11 @@ steps:
   image: adonagy/tezedge-ci-builder:latest
   pull: if-not-exists
   user: root
+  environment:
+    RUST_BACKTRACE: 1
+    SODIUM_USE_PKG_CONFIG: 1
+    OCAML_BUILD_CHAIN: remote
+    LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
   commands:
     - cargo build
     - cargo test --verbose -- --nocapture --ignored integration_test_dev
