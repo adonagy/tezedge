@@ -79,6 +79,4 @@ steps:
     OCAML_BUILD_CHAIN: remote
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
   commands:
-    - cargo build
-    - cargo test --verbose dummy
-    - cargo test --verbose -- --nocapture --ignored integration_test_dev
+    - cargo test --verbose --release -- --nocapture --ignored integration_test_dev
