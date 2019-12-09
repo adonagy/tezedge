@@ -42,7 +42,7 @@ steps:
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
   commands: 
     - mkdir /tmp/tezedge
-    - cargo run --release --bin light-node -- --config-file ./light_node/etc/tezedge/tezedge.config --protocol-runner "./target/release/protocol-runner" --p2p-port 19733 --identity-file /drone/src/docker/identities/identity_tezedge.json --ffi-calls-gc-treshold=2000
+    - cargo run --release --bin light-node -- --config-file ./light_node/etc/tezedge/tezedge.config --protocol-runner "./target/release/protocol-runner" --p2p-port 19733 --identity-file /drone/src/docker/identities/identity_tezedge.json --ffi-calls-gc-treshold=2000 --peers ::ffff:176.191.110.22:9732,::ffff:23.96.48.25:19732,::::ffff:164.68.124.104:19732
 
 - name: ocaml-node-run
   image: tezos/tezos:babylonnet
@@ -50,7 +50,7 @@ steps:
   commands:
     - mkdir /home/tezos/data
     - cp /drone/src/docker/identities/identity_ocaml.json /home/tezos/data/identity.json
-    - tezos-node run --rpc-addr 0.0.0.0 --net-addr 0.0.0.0:9734 --data-dir /home/tezos/data --history-mode archive
+    - tezos-node run --rpc-addr 0.0.0.0 --net-addr 0.0.0.0:9734 --data-dir /home/tezos/data --history-mode archive 
 
 # # build devel build and build test libs from [dev-dependencies]
 # - name: build-tezedge-devel
