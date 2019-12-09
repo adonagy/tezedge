@@ -62,5 +62,8 @@ steps:
   user: root
   commands:
     - sleep 5
-    - cargo test --release test_heads
+    - cargo test test_heads
 
+# trigger:
+#   event:
+#     - pull_request
