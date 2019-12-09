@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: MIT
 
 use std::collections::HashMap;
-use std::sync::Arc;
 use std::time::{Duration, Instant};
 
 use failure::Error;
@@ -10,12 +9,12 @@ use itertools::Itertools;
 use riker::actors::*;
 use slog::{debug, FnValue, info, trace, warn};
 
+use crypto::hash::{BlockHash, ChainId, HashType};
 use networking::p2p::network_channel::{NetworkChannelMsg, NetworkChannelRef, PeerBootstrapped};
 use networking::p2p::peer::{PeerRef, SendMessage};
 use storage::{BlockHeaderWithHash, BlockStorage, BlockStorageReader, OperationsStorage, OperationsStorageReader, StorageError};
-use storage::persistent::CommitLogs;
+use storage::persistent::PersistentStorage;
 use tezos_api::client::TezosStorageInitInfo;
-use tezos_encoding::hash::{BlockHash, ChainId, HashEncoding, HashType};
 use tezos_messages::p2p::binary_message::MessageHash;
 use tezos_messages::p2p::encoding::prelude::*;
 
@@ -113,9 +112,9 @@ pub struct ChainManager {
 pub type ChainManagerRef = ActorRef<ChainManagerMsg>;
 
 impl ChainManager {
-    pub fn actor(sys: &impl ActorRefFactory, network_channel: NetworkChannelRef, shell_channel: ShellChannelRef, rocks_db: Arc<rocksdb::DB>, commit_logs: Arc<CommitLogs>, init_info: &TezosStorageInitInfo) -> Result<ChainManagerRef, CreateError> {
+    pub fn actor(sys: &impl ActorRefFactory, network_channel: NetworkChannelRef, shell_channel: ShellChannelRef, persistent_storage: &PersistentStorage, init_info: &TezosStorageInitInfo) -> Result<ChainManagerRef, CreateError> {
         sys.actor_of(
-            Props::new_args(ChainManager::new, (network_channel, shell_channel, rocks_db, commit_logs, init_info.chain_id.clone(),
+            Props::new_args(ChainManager::new, (network_channel, shell_channel, persistent_storage.clone(), init_info.chain_id.clone(),
                                                 CurrentHead { local: init_info.current_block_header_hash.clone(), remote: init_info.genesis_block_header_hash.clone(), remote_level: 0 })),
             ChainManager::name())
     }
@@ -126,14 +125,14 @@ impl ChainManager {
         "chain-manager"
     }
 
-    fn new((network_channel, shell_channel, rocks_db, commit_logs, chain_id, current_head): (NetworkChannelRef, ShellChannelRef, Arc<rocksdb::DB>, Arc<CommitLogs>, ChainId, CurrentHead)) -> Self {
+    fn new((network_channel, shell_channel, persistent_storage, chain_id, current_head): (NetworkChannelRef, ShellChannelRef, PersistentStorage, ChainId, CurrentHead)) -> Self {
         ChainManager {
             network_channel,
             shell_channel,
-            block_storage: Box::new(BlockStorage::new(rocks_db.clone(), commit_logs.clone())),
-            operations_storage: Box::new(OperationsStorage::new(rocks_db.clone())),
-            block_state: BlockState::new(rocks_db.clone(), commit_logs, &chain_id),
-            operations_state: OperationsState::new(rocks_db, &chain_id),
+            block_storage: Box::new(BlockStorage::new(&persistent_storage)),
+            operations_storage: Box::new(OperationsStorage::new(&persistent_storage)),
+            block_state: BlockState::new(&persistent_storage, &chain_id),
+            operations_state: OperationsState::new(&persistent_storage, &chain_id),
             peers: HashMap::new(),
             current_head,
             shutting_down: false,
@@ -338,7 +337,7 @@ impl ChainManager {
                                             }
                                         }
                                         None => {
-                                            warn!(log, "Received unexpected block header"; "block_header_hash" => HashEncoding::new(HashType::BlockHash).bytes_to_string(&block_header_with_hash.hash));
+                                            warn!(log, "Received unexpected block header"; "block_header_hash" => HashType::BlockHash.bytes_to_string(&block_header_with_hash.hash));
                                             ctx.system.stop(received.peer.clone());
                                         }
                                     }
@@ -367,7 +366,7 @@ impl ChainManager {
                                             let operation_was_expected = missing_operations.validation_passes.remove(&operations.operations_for_block().validation_pass());
                                             if operation_was_expected {
                                                 peer.operations_response_last = Instant::now();
-                                                trace!(log, "Received operations validation pass"; "validation_pass" => operations.operations_for_block().validation_pass(), "block_header_hash" => HashEncoding::new(HashType::BlockHash).bytes_to_string(&block_hash));
+                                                trace!(log, "Received operations validation pass"; "validation_pass" => operations.operations_for_block().validation_pass(), "block_header_hash" => HashType::BlockHash.bytes_to_string(&block_hash));
 
                                                 if operations_state.process_block_operations(&operations)? {
                                                     // update stats
@@ -391,7 +390,7 @@ impl ChainManager {
                                                     peer.queued_operations.remove(&block_hash);
                                                 }
                                             } else {
-                                                warn!(log, "Received unexpected validation pass"; "validation_pass" => operations.operations_for_block().validation_pass(), "block_header_hash" => HashEncoding::new(HashType::BlockHash).bytes_to_string(&block_hash));
+                                                warn!(log, "Received unexpected validation pass"; "validation_pass" => operations.operations_for_block().validation_pass(), "block_header_hash" => HashType::BlockHash.bytes_to_string(&block_hash));
                                                 ctx.system.stop(received.peer.clone());
                                             }
                                         }
@@ -534,7 +533,7 @@ impl Receive<LogStats> for ChainManager {
 
     fn receive(&mut self, ctx: &Context<Self::Msg>, _msg: LogStats, _sender: Sender) {
         let log = ctx.system.log();
-        let block_hash_encoding = HashEncoding::new(HashType::BlockHash);
+        let block_hash_encoding = HashType::BlockHash;
         info!(log, "Head info"; "local" => &block_hash_encoding.bytes_to_string(&self.current_head.local), "remote" => &block_hash_encoding.bytes_to_string(&self.current_head.remote), "remote_level" => self.current_head.remote_level);
         info!(log, "Blocks and operations info";
             "block_count" => self.stats.unseen_block_count,

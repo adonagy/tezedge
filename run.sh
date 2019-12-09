@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 warn_if_not_using_recommended_rust() {
-  RUSTC_TOOLCHAIN_VERSION="2019-12-03"
+  RUSTC_TOOLCHAIN_VERSION="2019-12-05"
 
   EXPECTED_RUSTC_VERSION=$(date -d "$RUSTC_TOOLCHAIN_VERSION -1 day" +"%Y-%m-%d")
   RUSTC_VERSION=$(rustc --version | gawk 'match($0, /.*\(.* ([0-9-]+)\)/, a) {print a[1]}')
@@ -92,38 +92,38 @@ run_node() {
   # Supports '--arg=val' and '--arg val' syntax of the commandline arguments.
   while [ "$#" -gt 0 ]; do
     case $1 in
-      -d=*|--tezos-data-dir=*)
+      --tezos-data-dir=*)
         TEZOS_DIR="${1#*=}"
         shift
         ;;
-      -d|--tezos-data-dir)
+      --tezos-data-dir)
         shift
         TEZOS_DIR="$1"
         shift
         ;;
-      -c=*|--config-file=*)
+      --config-file=*)
         CONFIG_FILE="${1#*=}"
         shift
         ;;
-      -c|--config-file)
+      --config-file)
         shift
         CONFIG_FILE="$1"
         shift
         ;;
-      -B=*|--bootstrap-db-path=*)
+      --bootstrap-db-path=*)
         BOOTSTRAP_DIR="${1#*=}"
         shift
         ;;
-      -B|--bootstrap-db-path)
+      --bootstrap-db-path)
         shift
         BOOTSTRAP_DIR="$1"
         shift
         ;;
-      -n=*|--network=*)
+      --network=*)
         NETWORK="${1#*=}"
         shift
         ;;
-      -n|--network)
+      --network)
         shift
         NETWORK="$1"
         shift

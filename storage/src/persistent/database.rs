@@ -39,7 +39,7 @@ impl From<Error> for DBError {
 }
 
 /// Custom trait extending RocksDB to better handle and enforce database schema
-pub trait DatabaseWithSchema<S: KeyValueSchema> {
+pub trait KeyValueStoreWithSchema<S: KeyValueSchema> {
     /// Insert new key value pair into the database. If key already exists, method will fail
     ///
     /// # Arguments
@@ -80,7 +80,7 @@ pub trait DatabaseWithSchema<S: KeyValueSchema> {
     fn contains(&self, key: &S::Key) -> Result<bool, DBError>;
 }
 
-impl<S: KeyValueSchema> DatabaseWithSchema<S> for DB {
+impl<S: KeyValueSchema> KeyValueStoreWithSchema<S> for DB {
     fn put(&self, key: &S::Key, value: &S::Value) -> Result<(), DBError> {
         let key = key.encode()?;
         let value = value.encode()?;
@@ -143,7 +143,7 @@ impl<S: KeyValueSchema> DatabaseWithSchema<S> for DB {
         let contains = if iter.valid() {
             let iter: DBRawIterator = iter.into();
             match iter.key() {
-                Some(key_from_db) => key_from_db == key,
+                Some(key_from_db) => key_from_db == &key[..],
                 None => false
             }
         } else {
