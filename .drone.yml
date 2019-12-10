@@ -80,3 +80,7 @@ steps:
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
   commands:
     - cargo test --verbose --release -- --nocapture --ignored integration_test_dev
+
+trigger:
+  branch:
+    - master
