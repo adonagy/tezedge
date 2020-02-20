@@ -27,6 +27,7 @@ steps:
 #     - cargo run --release --bin light-node -- --config-file ./light_node/etc/tezedge/tezedge.config --protocol-runner "./target/release/protocol-runner" --p2p-port 39733 --websocket-address 0.0.0.0:34927 --rpc-port 18732 --tezos-data-dir=/tmp/tezedge_developer
 
 - name: ocaml-node-run
+  user: root
   image: tezos/tezos:babylonnet
   detach: true
   volumes:
