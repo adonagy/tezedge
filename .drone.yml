@@ -29,6 +29,9 @@ steps:
 - name: ocaml-node-run
   image: tezos/tezos:babylonnet
   detach: true
+  volumes:
+    - name: ocaml-node-data
+      path: /home/.tezos-node
   commands:
     - mkdir /home/tezos/data
     - cp /drone/src/docker/identities/identity_ocaml.json /home/tezos/data/identity.json
@@ -48,6 +51,11 @@ steps:
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
   commands:
     - cargo test --verbose --release -- --nocapture --ignored integration_test_dev
+
+volumes:
+  - name: ocaml-node-data
+    host:
+      path: /home/ado/tezos-node-backup
 
 trigger:
   branch:
