@@ -13,21 +13,21 @@ steps:
 #   commands:
 #     - cargo clean && cargo build --release
 
-# - name: tezedge-node-run
-#   image: adonagy/tezedge-ci-builder:latest
-#   user: root
-#   detach: true
-#   volumes:
-#     - name: tezedge-node-data
-#       path: /tmp/tezedge_developer
-#   environment:
-#     RUST_BACKTRACE: 1
-#     SODIUM_USE_PKG_CONFIG: 1
-#     OCAML_BUILD_CHAIN: remote
-#     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
-#   commands: 
-#     - cargo build --release
-#     - cargo run --release --bin light-node -- --config-file ./light_node/etc/tezedge/tezedge.config --protocol-runner "./target/release/protocol-runner" --p2p-port 39733 --websocket-address 0.0.0.0:34927 --rpc-port 18732 --tezos-data-dir=/tmp/tezedge_developer/tezos-node --bootstrap-db-path=/tmp/tezedge_developer/light-node
+- name: tezedge-node-run
+  image: adonagy/tezedge-ci-builder:latest
+  user: root
+  detach: true
+  volumes:
+    - name: tezedge-node-data
+      path: /tmp/tezedge_developer
+  environment:
+    RUST_BACKTRACE: 1
+    SODIUM_USE_PKG_CONFIG: 1
+    OCAML_BUILD_CHAIN: remote
+    LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
+  commands: 
+    - cargo build --release
+    - cargo run --release --bin light-node -- --config-file ./light_node/etc/tezedge/tezedge.config --protocol-runner "./target/release/protocol-runner" --p2p-port 39733 --websocket-address 0.0.0.0:34927 --rpc-port 18732 --tezos-data-dir=/tmp/tezedge_developer/tezos-node --bootstrap-db-path=/tmp/tezedge_developer/light-node
 
 - name: ocaml-node-run
   user: root
