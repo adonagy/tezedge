@@ -58,7 +58,6 @@ steps:
     TZ_SERVER_CORS_ENABLE: true
     TZ_DATABASE_PATH: /data/index
     TZ_SNAPSHOT_PATH: /data/snapshots
-    TZ_LOGGING_RPC: debug
 
 # - name: test
 #   image: adonagy/tezedge-ci-builder:latest
