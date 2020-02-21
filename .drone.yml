@@ -26,7 +26,7 @@ steps:
     OCAML_BUILD_CHAIN: remote
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
   commands: 
-    - cargo run --release --bin light-node -- --config-file ./light_node/etc/tezedge/tezedge.config --protocol-runner "./target/release/protocol-runner" --p2p-port 39733 --websocket-address 0.0.0.0:34927 --rpc-port 18732 --tezos-data-dir=/tmp/tezedge_developer
+    - cargo run --release --bin light-node -- --config-file ./light_node/etc/tezedge/tezedge.config --protocol-runner "./target/release/protocol-runner" --p2p-port 39733 --websocket-address 0.0.0.0:34927 --rpc-port 18732 --tezos-data-dir=/tmp/tezedge_developer/tezos-node --bootstrap-db-path=/tmp/tezedge_developer/light-node
 
 - name: ocaml-node-run
   user: root
