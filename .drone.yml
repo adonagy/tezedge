@@ -91,7 +91,7 @@ steps:
 
 - name: tz-indexer
   image: blockwatch/tzindex:latest
-  detach: true
+  # detach: true
   environment:
     TZ_RPC_HOST: tezedge-node-run
     TZ_RPC_PORT: 18732
