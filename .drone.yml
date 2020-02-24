@@ -59,6 +59,11 @@ steps:
     TZ_DATABASE_PATH: /data/index
     TZ_SNAPSHOT_PATH: /data/snapshots
 
+- name: indexer-test
+  image: adonagy/tezos-node-bootstrap:indexer
+  commands:
+    - tezos-node-bootstrap --indexer-test
+
 # - name: test
 #   image: adonagy/tezedge-ci-builder:latest
 #   pull: if-not-exists
