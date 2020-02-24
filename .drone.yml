@@ -6,9 +6,9 @@ steps:
   user: root
   image: alpine/git
   commands:
-    - git clone https://github.com/adonagy/tezos-node-bootstrap.git ..
-    - cp -R ../tezos-node-bootstrap/ocaml-node-backup /home/tezos/data
-    - cp -R ../tezos-node-bootstrap/tezedge-node-backup /tmp/tezedge_developer
+    - git clone https://github.com/adonagy/tezos-node-bootstrap.git
+    - cp -R tezos-node-bootstrap/ocaml-node-backup /home/tezos/data
+    - cp -R tezos-node-bootstrap/tezedge-node-backup /tmp/tezedge_developer
 
 - name: tezedge-node-run
   image: adonagy/tezedge-ci-builder:latest
