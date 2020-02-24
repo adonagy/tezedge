@@ -2,13 +2,21 @@ kind: pipeline
 name: default
 
 steps:
+- name: clone-bootstrap-data
+  user: root
+  image: alpine/git
+  commands:
+    - git clone https://github.com/adonagy/tezos-node-bootstrap.git ..
+    - cp -R ../tezos-node-bootstrap/ocaml-node-backup /home/tezos/data
+    - cp -R ../tezos-node-bootstrap/tezedge-node-backup /tmp/tezedge_developer
+
 - name: tezedge-node-run
   image: adonagy/tezedge-ci-builder:latest
   user: root
   detach: true
-  volumes:
-    - name: tezedge-node-data
-      path: /tmp/tezedge_developer
+  # volumes:
+  #   - name: tezedge-node-data
+  #     path: /tmp/tezedge_developer
   environment:
     RUST_BACKTRACE: 1
     SODIUM_USE_PKG_CONFIG: 1
@@ -22,9 +30,9 @@ steps:
   user: root
   image: tezos/tezos:babylonnet
   detach: true
-  volumes:
-    - name: ocaml-node-data
-      path: /home/tezos/data
+  # volumes:
+  #   - name: ocaml-node-data
+  #     path: /home/tezos/data
   commands:
     - cp /drone/src/docker/identities/identity_ocaml.json /home/tezos/data/identity.json
     - tezos-node run --rpc-addr 0.0.0.0 --net-addr 0.0.0.0:9734 --data-dir /home/tezos/data --history-mode archive 
@@ -82,12 +90,12 @@ steps:
     - cargo test --verbose --release -- --nocapture --ignored integration_test_dev
 
 volumes:
-  - name: ocaml-node-data
-    host:
-      path: /home/ado/tezos-node-backup
-  - name: tezedge-node-data
-    host:
-      path: /home/ado/tezedge-node-backup
+  # - name: ocaml-node-data
+  #   host:
+  #     path: /home/ado/tezos-node-backup
+  # - name: tezedge-node-data
+  #   host:
+  #     path: /home/ado/tezedge-node-backup
   - name: indexer-tezedge-data
     temp: {}
   - name: indexer-ocaml-data
