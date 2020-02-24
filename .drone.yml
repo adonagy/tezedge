@@ -46,7 +46,7 @@ steps:
 - name: tz-indexer
   image: blockwatch/tzindex:latest
   user: root
-  # detach: true
+  detach: true
   volumes:
     - name: indexer-data
       path: /data
