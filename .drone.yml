@@ -43,12 +43,12 @@ steps:
 - name: bootstrapping
   image: adonagy/tezos-node-bootstrap:latest
 
-- name: tz-indexer
+- name: tz-indexer-tezedge
   image: blockwatch/tzindex:latest
   user: root
   detach: true
   volumes:
-    - name: indexer-data
+    - name: indexer-tezedge-data
       path: /data
   environment:
     TZ_RPC_HOST: tezedge-node-run
@@ -58,6 +58,22 @@ steps:
     TZ_SERVER_CORS_ENABLE: true
     TZ_DATABASE_PATH: /data/index
     TZ_SNAPSHOT_PATH: /data/snapshots
+
+- name: tz-indexer-ocaml
+    image: blockwatch/tzindex:latest
+    user: root
+    detach: true
+    volumes:
+      - name: indexer-ocaml-data
+        path: /data
+    environment:
+      TZ_RPC_HOST: ocaml-node-run
+      TZ_RPC_PORT: 8732
+      TZ_SERVER_ADDR: 0.0.0.0
+      TZ_SERVER_PORT: 8002
+      TZ_SERVER_CORS_ENABLE: true
+      TZ_DATABASE_PATH: /data/index
+      TZ_SNAPSHOT_PATH: /data/snapshots
 
 - name: indexer-test
   image: adonagy/tezos-node-bootstrap:indexer
@@ -83,9 +99,12 @@ volumes:
   - name: tezedge-node-data
     host:
       path: /home/ado/tezedge-node-backup
-  - name: indexer-data
+  - name: indexer-tezedge-data
     host:
-      path: /home/ado/indexer/data
+      path: /home/ado/indexer/tezedge/data
+  - name: indexer-ocaml-data
+    host:
+      path: /home/ado/indexer/ocaml/data
 
 trigger:
   branch:
