@@ -99,12 +99,16 @@ volumes:
   - name: tezedge-node-data
     host:
       path: /home/ado/tezedge-node-backup
+  # - name: indexer-tezedge-data
+  #   host:
+  #     path: /home/ado/indexer/tezedge
+  # - name: indexer-ocaml-data
+  #   host:
+  #     path: /home/ado/indexer/ocaml
   - name: indexer-tezedge-data
-    host:
-      path: /home/ado/indexer/tezedge
+    temp: {}
   - name: indexer-ocaml-data
-    host:
-      path: /home/ado/indexer/ocaml
+    temp: {}
 
 trigger:
   branch:
