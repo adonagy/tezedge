@@ -19,6 +19,7 @@ steps:
     - name: tezedge-node-data
       path: /tmp/tezedge_developer
   environment:
+    SODIUM_USE_PKG_CONFIG: 1
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts:./target/release
   commands: 
     - ls -la 
