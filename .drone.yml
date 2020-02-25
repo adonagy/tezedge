@@ -20,7 +20,7 @@ steps:
   environment:
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts:./target/release
   commands: 
-    - cargo run --release -vv --bin light-node -- --protocol-runner "./target/release/protocol-runner" --p2p-port 39733 --websocket-address 0.0.0.0:34927 --rpc-port 18732 --tezos-data-dir=/tmp/tezedge_developer/tezos-node --bootstrap-db-path=/tmp/tezedge_developer/light-node
+    - cargo run --release --bin light-node -- --protocol-runner "./target/release/protocol-runner" --p2p-port 39733 --websocket-address 0.0.0.0:34927 --rpc-port 18732 --tezos-data-dir=/tmp/tezedge_developer/tezos-node --bootstrap-db-path=/tmp/tezedge_developer/light-node
 
 - name: ocaml-node-run
   user: root
