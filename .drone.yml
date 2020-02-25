@@ -8,6 +8,7 @@ steps:
   environment:
     SODIUM_USE_PKG_CONFIG: 1
   commands:
+    - ls -la
     - cargo build --release
 
 - name: tezedge-node-run
@@ -20,6 +21,7 @@ steps:
   environment:
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts:./target/release
   commands: 
+    - ls -la 
     - cargo run --release --bin light-node -- --protocol-runner "./target/release/protocol-runner" --p2p-port 39733 --websocket-address 0.0.0.0:34927 --rpc-port 18732 --tezos-data-dir=/tmp/tezedge_developer/tezos-node --bootstrap-db-path=/tmp/tezedge_developer/light-node
 
 - name: ocaml-node-run
