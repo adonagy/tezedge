@@ -6,11 +6,7 @@ steps:
   image: adonagy/tezedge-ci-builder:latest
   user: root
   environment:
-    RUST_BACKTRACE: 1
-    RUST_LOG: info
     SODIUM_USE_PKG_CONFIG: 1
-    OCAML_BUILD_CHAIN: remote
-    LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
   commands:
     - cargo build --release
 
@@ -26,7 +22,7 @@ steps:
     RUST_LOG: info
     SODIUM_USE_PKG_CONFIG: 1
     OCAML_BUILD_CHAIN: remote
-    LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts
+    LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts:./target/release
   commands: 
     - cargo run --release -vv --bin light-node -- --protocol-runner "./target/release/protocol-runner" --p2p-port 39733 --websocket-address 0.0.0.0:34927 --rpc-port 18732 --tezos-data-dir=/tmp/tezedge_developer/tezos-node --bootstrap-db-path=/tmp/tezedge_developer/light-node
 
