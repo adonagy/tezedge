@@ -13,6 +13,7 @@ steps:
 
 - name: tezedge-node-run
   image: adonagy/tezedge-ci-builder:latest
+  pull: if-not-exists
   user: root
   detach: true
   volumes:
