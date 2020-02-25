@@ -9,7 +9,7 @@ steps:
     SODIUM_USE_PKG_CONFIG: 1
   commands:
     - ls -la
-    - cargo build --release
+    - cargo build --release --workspace
 
 - name: tezedge-node-run
   image: adonagy/tezedge-ci-builder:latest
