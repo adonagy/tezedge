@@ -24,7 +24,7 @@ steps:
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts:./target/release
   commands: 
     - ls -la 
-    - cargo run --release --bin light-node -- --protocol-runner "./target/release/protocol-runner" --p2p-port 39733 --websocket-address 0.0.0.0:34927 --rpc-port 18732 --tezos-data-dir=/tmp/tezedge_developer/tezos-node --bootstrap-db-path=/tmp/tezedge_developer/light-node
+    - cargo run --release --bin light-node -- --network "babylonnet" --identity-file "/drone/src/docker/identities/identity_tezedge.json" --protocol-runner "./target/release/protocol-runner" --p2p-port 39733 --websocket-address 0.0.0.0:34927 --rpc-port 18732 --tezos-data-dir=/tmp/tezedge_developer/tezos-node --bootstrap-db-path=/tmp/tezedge_developer/light-node
 
 - name: ocaml-node-run
   user: root
@@ -92,10 +92,13 @@ steps:
 volumes:
   - name: ocaml-node-data
     host:
-      path: /home/ado/tezos-node-backup
+      # path: /home/ado/tezos-node-backup
+      path: /etc/ocaml-node
   - name: tezedge-node-data
     host:
-      path: /home/ado/tezedge-node-backup
+      # path: /home/ado/tezedge-node-backup
+      path: /etc/tezedge-node
+      
   - name: indexer-tezedge-data
     temp: {}
   - name: indexer-ocaml-data
