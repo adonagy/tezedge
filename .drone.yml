@@ -26,6 +26,7 @@ steps:
   pull: if-not-exists
   user: root
   detach: true
+  failure: fast
   volumes:
     - name: tezedge-node-data
       path: /tmp/tezedge_developer
@@ -38,6 +39,7 @@ steps:
 - name: ocaml-node-run
   user: root
   image: tezos/tezos:babylonnet
+  failure: fast
   detach: true
   volumes:
     - name: ocaml-node-data
@@ -54,6 +56,7 @@ steps:
 - name: tz-indexer-tezedge
   image: blockwatch/tzindex:latest
   user: root
+  failure: fast
   detach: true
   volumes:
     - name: indexer-tezedge-data
@@ -69,6 +72,7 @@ steps:
 
 - name: tz-indexer-ocaml
   image: blockwatch/tzindex:latest
+  failure: fast
   user: root
   detach: true
   volumes:
