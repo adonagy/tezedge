@@ -51,7 +51,7 @@ steps:
   commands: 
     - pwd
     - ls -la
-    - cd /tmp/tezedge-cache
+    - cd /tmp/tezedge-cache/tezedge
     - cargo run --release --bin light-node -- --config-file "./light_node/etc/tezedge/tezedge.config" --network "babylonnet" --protocol-runner "./target/release/protocol-runner" --p2p-port 39734 --websocket-address 0.0.0.0:34928 --rpc-port 28732 --tezos-data-dir=/tmp/tezedge_developer/tezos-node --bootstrap-db-path=/tmp/tezedge_developer/light-node
 
 - name: tezedge-node-run
