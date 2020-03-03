@@ -27,8 +27,11 @@ steps:
   environment:
     SODIUM_USE_PKG_CONFIG: 1
   commands:
+    - pwd
     - mkdir ../master && cd ../master
+    - pwd
     - git clone https://github.com/simplestaking/tezedge.git && cd tezedge
+    - pwd
     - cargo build --release --workspace
 
 - name: tezedge-master-node-run
@@ -43,6 +46,7 @@ steps:
     SODIUM_USE_PKG_CONFIG: 1
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts:./target/release
   commands: 
+    - pwd
     - cd ../master
     - cargo run --release --bin light-node -- --config-file "./light_node/etc/tezedge/tezedge.config" --network "babylonnet" --protocol-runner "./target/release/protocol-runner" --p2p-port 39734 --websocket-address 0.0.0.0:34928 --rpc-port 28732 --tezos-data-dir=/tmp/tezedge_developer/tezos-node --bootstrap-db-path=/tmp/tezedge_developer/light-node
 
@@ -74,13 +78,13 @@ steps:
 - name: bootstrapping
   image: simplestakingcom/tezos-node-bootstrap:wrk
   commands:
-    - tezos-node-bootstrap --performance-test
+    - tezos-node-bootstrap --bootstrap
 
 - name: wrk-performance-test
   image: simplestakingcom/tezos-node-bootstrap:wrk
   user: root
   commands:
-    - tezos-node-bootstrap --bootstrap 
+    - tezos-node-bootstrap --performance-test 
 
 - name: tz-indexer-tezedge
   image: blockwatch/tzindex:latest
