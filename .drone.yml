@@ -24,12 +24,13 @@ steps:
 - name: build-tezedge-master
   image: simplestakingcom/tezedge-ci-builder:latest
   user: root
+  volumes:
+    - name: cache
+      path: /tmp/tezedge-cache
   environment:
     SODIUM_USE_PKG_CONFIG: 1
   commands:
-    - pwd
-    - mkdir ../master && cd ../master
-    - pwd
+    - cd /tmp/tezedge-cache
     - git clone https://github.com/simplestaking/tezedge.git && cd tezedge
     - pwd
     - cargo build --release --workspace
@@ -42,13 +43,15 @@ steps:
   volumes:
     - name: tezedge-master-node-data
       path: /tmp/tezedge_developer
+    - name: cache
+      path: /tmp/tezedge-cache
   environment:
     SODIUM_USE_PKG_CONFIG: 1
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts:./target/release
   commands: 
     - pwd
     - ls -la
-    - cd /drone/master/tezedge
+    - cd /tmp/tezedge-cache
     - cargo run --release --bin light-node -- --config-file "./light_node/etc/tezedge/tezedge.config" --network "babylonnet" --protocol-runner "./target/release/protocol-runner" --p2p-port 39734 --websocket-address 0.0.0.0:34928 --rpc-port 28732 --tezos-data-dir=/tmp/tezedge_developer/tezos-node --bootstrap-db-path=/tmp/tezedge_developer/light-node
 
 - name: tezedge-node-run
@@ -146,6 +149,9 @@ volumes:
   - name: tezedge-master-node-data
     host:
       path: /etc/tezedge-master-node
+  - name: cache
+    host:
+      path: /etc/tezedge-ci/cache
       
   - name: indexer-tezedge-data
     temp: {}
