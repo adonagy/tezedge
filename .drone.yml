@@ -31,6 +31,7 @@ steps:
     SODIUM_USE_PKG_CONFIG: 1
   commands:
     - cd /tmp/tezedge-cache
+    - rm -rf tezedge
     - git clone https://github.com/simplestaking/tezedge.git && cd tezedge
     - pwd
     - cargo build --release --workspace
