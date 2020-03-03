@@ -47,6 +47,7 @@ steps:
     LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts:./target/release
   commands: 
     - pwd
+    - ls -la
     - cd /drone/master/tezedge
     - cargo run --release --bin light-node -- --config-file "./light_node/etc/tezedge/tezedge.config" --network "babylonnet" --protocol-runner "./target/release/protocol-runner" --p2p-port 39734 --websocket-address 0.0.0.0:34928 --rpc-port 28732 --tezos-data-dir=/tmp/tezedge_developer/tezos-node --bootstrap-db-path=/tmp/tezedge_developer/light-node
 
