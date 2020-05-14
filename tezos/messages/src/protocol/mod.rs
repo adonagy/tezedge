@@ -127,8 +127,7 @@ pub fn get_constants_for_rpc(bytes: &[u8], protocol: ProtocolHash) -> Result<Opt
             println!("{:?}", bytes);
             let context_param = ParametricConstants::from_bytes(bytes.to_vec())?;
             
-            // only these fields are modified in proto 001
-            let param = ParametricConstants::merge_modified(context_param);
+            let param = ParametricConstants::create_with_default(context_param);
 
             let mut param_map = param.as_map();
             param_map.extend(FIXED.clone().as_map());
