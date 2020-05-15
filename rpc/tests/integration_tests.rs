@@ -60,7 +60,7 @@ async fn integration_tests_rpc(from_block: i64, to_block: i64) {
         test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", level, "context/constants")).await;
         test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", level, "helpers/endorsing_rights")).await;
         test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", level, "helpers/baking_rights")).await;
-        test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", level, "votes/listings")).await;
+        // test_rpc_compare_json(&format!("{}/{}/{}", "chains/main/blocks", level, "votes/listings")).await;
         // --------------------------------- End of tests --------------------------------
 
         // we need some constants for
@@ -104,39 +104,39 @@ async fn integration_tests_rpc(from_block: i64, to_block: i64) {
             // ----------------- End of tests for each snapshot of the cycle ------------------
         }
             // test first and last level of cycle
-        if level == 1 || (level >= blocks_per_cycle && ( (level-1) % blocks_per_cycle == 0 || level % blocks_per_cycle == 0)) {
+        // if level == 1 || (level >= blocks_per_cycle && ( (level-1) % blocks_per_cycle == 0 || level % blocks_per_cycle == 0)) {
 
-            // ----------------------- Tests for each cycle of the cycle -----------------------
-            println!("run cycle tests: {}, level: {:?}", cycle, level);
+        //     // ----------------------- Tests for each cycle of the cycle -----------------------
+        //     println!("run cycle tests: {}, level: {:?}", cycle, level);
 
-            test_rpc_compare_json(&format!("{}/{}/{}?cycle={}", "chains/main/blocks", level, "helpers/endorsing_rights", cycle)).await;
-            test_rpc_compare_json(&format!("{}/{}/{}?cycle={}", "chains/main/blocks", level, "helpers/endorsing_rights", cycle+preserved_cycles)).await;
-            test_rpc_compare_json(&format!("{}/{}/{}?cycle={}", "chains/main/blocks", level, "helpers/endorsing_rights", std::cmp::max(0, cycle-2) )).await;
+        //     test_rpc_compare_json(&format!("{}/{}/{}?cycle={}", "chains/main/blocks", level, "helpers/endorsing_rights", cycle)).await;
+        //     test_rpc_compare_json(&format!("{}/{}/{}?cycle={}", "chains/main/blocks", level, "helpers/endorsing_rights", cycle+preserved_cycles)).await;
+        //     test_rpc_compare_json(&format!("{}/{}/{}?cycle={}", "chains/main/blocks", level, "helpers/endorsing_rights", std::cmp::max(0, cycle-2) )).await;
 
-            test_rpc_compare_json(&format!("{}/{}/{}?all&cycle={}", "chains/main/blocks", level, "helpers/baking_rights", cycle)).await;
-            test_rpc_compare_json(&format!("{}/{}/{}?all&cycle={}", "chains/main/blocks", level, "helpers/baking_rights", cycle+preserved_cycles)).await;
-            test_rpc_compare_json(&format!("{}/{}/{}?all&cycle={}", "chains/main/blocks", level, "helpers/baking_rights", std::cmp::max(0, cycle-2) )).await;
-            //test_rpc_compare_json(&format!("{}/{}/{}?cycle={}&delegate={}", "chains/main/blocks", &prev_block, "helpers/endorsing_rights", cycle, "tz1YH2LE6p7Sj16vF6irfHX92QV45XAZYHnX")).await;
+        //     test_rpc_compare_json(&format!("{}/{}/{}?all&cycle={}", "chains/main/blocks", level, "helpers/baking_rights", cycle)).await;
+        //     test_rpc_compare_json(&format!("{}/{}/{}?all&cycle={}", "chains/main/blocks", level, "helpers/baking_rights", cycle+preserved_cycles)).await;
+        //     test_rpc_compare_json(&format!("{}/{}/{}?all&cycle={}", "chains/main/blocks", level, "helpers/baking_rights", std::cmp::max(0, cycle-2) )).await;
+        //     //test_rpc_compare_json(&format!("{}/{}/{}?cycle={}&delegate={}", "chains/main/blocks", &prev_block, "helpers/endorsing_rights", cycle, "tz1YH2LE6p7Sj16vF6irfHX92QV45XAZYHnX")).await;
 
-            // known ocaml node bugs
-            // - endorsing rights: for cycle 0, when requested cycle 4 there should be cycle check error:
-            //  [{"kind":"permanent","id":"proto.005-PsBabyM1.seed.unknown_seed","oldest":0,"requested":4,"latest":3}]
-            //  instead there is panic on 
-            //  [{"kind":"permanent","id":"proto.005-PsBabyM1.context.storage_error","missing_key":["cycle","4","last_roll","1"],"function":"get"}]
-            // if cycle==0 {
-            //     let block_level_1000 = "BM9xFVaVv6mi7ckPbTgxEe7TStcfFmteJCpafUZcn75qi2wAHrC";
-            //     test_rpc_compare_json(&format!("{}/{}/{}?cycle={}", "chains/main/blocks", block_level_1000, "helpers/endorsing_rights", 4)).await;
-            // }
-            // - endorsing rights: if there is last level of cycle is not possible to request cycle - PERSERVED_CYCLES
-            // test_rpc_compare_json(&format!("{}/{}/{}?cycle={}", "chains/main/blocks", &prev_block, "helpers/endorsing_rights", std::cmp::max(0, cycle-PERSERVED_CYCLES) )).await;
+        //     // known ocaml node bugs
+        //     // - endorsing rights: for cycle 0, when requested cycle 4 there should be cycle check error:
+        //     //  [{"kind":"permanent","id":"proto.005-PsBabyM1.seed.unknown_seed","oldest":0,"requested":4,"latest":3}]
+        //     //  instead there is panic on 
+        //     //  [{"kind":"permanent","id":"proto.005-PsBabyM1.context.storage_error","missing_key":["cycle","4","last_roll","1"],"function":"get"}]
+        //     // if cycle==0 {
+        //     //     let block_level_1000 = "BM9xFVaVv6mi7ckPbTgxEe7TStcfFmteJCpafUZcn75qi2wAHrC";
+        //     //     test_rpc_compare_json(&format!("{}/{}/{}?cycle={}", "chains/main/blocks", block_level_1000, "helpers/endorsing_rights", 4)).await;
+        //     // }
+        //     // - endorsing rights: if there is last level of cycle is not possible to request cycle - PERSERVED_CYCLES
+        //     // test_rpc_compare_json(&format!("{}/{}/{}?cycle={}", "chains/main/blocks", &prev_block, "helpers/endorsing_rights", std::cmp::max(0, cycle-PERSERVED_CYCLES) )).await;
 
-            // ------------------- End of tests for each cycle of the cycle --------------------
+        //     // ------------------- End of tests for each cycle of the cycle --------------------
 
-            if cycle_loop_counter == MAX_CYCLE_LOOPS*2 {
-                break
-            }
-            cycle_loop_counter += 1;
-        }
+        //     if cycle_loop_counter == MAX_CYCLE_LOOPS*2 {
+        //         break
+        //     }
+        //     cycle_loop_counter += 1;
+        // }
     }
 }
 
