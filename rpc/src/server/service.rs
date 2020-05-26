@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 use std::collections::{HashMap};
+use std::convert::TryInto;
 
 use failure::bail;
 use serde::{Deserialize, Serialize};
@@ -13,6 +14,7 @@ use storage::{BlockHeaderWithHash, BlockStorage, BlockStorageReader, ContextActi
 use storage::block_storage::BlockJsonData;
 use storage::persistent::PersistentStorage;
 use storage::skip_list::Bucket;
+use storage::context::{TezedgeContext, ContextIndex, ContextApi};
 use tezos_context::channel::ContextAction;
 use tezos_messages::protocol::{RpcJsonMap, UniversalValue};
 
@@ -197,26 +199,35 @@ pub(crate) fn get_cycle_length_for_block(block_id: &str, list: ContextList, stor
     }
 }
 
-pub(crate) fn get_cycle_from_context(level: &str, list: ContextList) -> Result<Option<HashMap<String, Cycle>>, failure::Error> {
+pub(crate) fn get_cycle_from_context(level: &str, list: ContextList, persistent_storage: &PersistentStorage) -> Result<Option<HashMap<String, Cycle>>, failure::Error> {
     let ctxt_level: usize = level.parse().unwrap();
 
-    let context_data = {
-        let reader = list.read().expect("mutex poisoning");
-        if let Ok(Some(c)) = reader.get(ctxt_level) {
-            c
-        } else {
-            bail!("Context data not found")
-        }
-    };
+    // let context_data = {
+    //     let reader = list.read().expect("mutex poisoning");
+    //     if let Ok(Some(c)) = reader.get(ctxt_level) {
+    //         c
+    //     } else {
+    //         bail!("Context data not found")
+    //     }
+    // };
+
+    let context = TezedgeContext::new(BlockStorage::new(&persistent_storage), list.clone());
+    let context_index = ContextIndex::new(Some(ctxt_level.try_into()?), None);
+    let context_data = context.get_by_key_prefix(&context_index, &vec!["data/cycle/".to_string()])?;
 
     // get cylce list from context storage
-    let cycle_lists: HashMap<String, Bucket<Vec<u8>>> = context_data.clone().into_iter()
-        .filter(|(k, _)| k.contains("cycle"))
-        .filter(|(_, v)| match v {
-            Bucket::Exists(_) => true,
-            _ => false
-        })
-        .collect();
+    // let cycle_lists: HashMap<String, Bucket<Vec<u8>>> = context_data.clone().into_iter()
+    //     .filter(|(k, _)| k.contains("cycle"))
+    //     .filter(|(_, v)| match v {
+    //         Bucket::Exists(_) => true,
+    //         _ => false
+    //     })
+    //     .collect();
+    let cycle_lists = if let Some(ctx) = context_data {
+        ctx
+    } else {
+        bail!("yolo")
+    };
 
     // transform cycle list
     let mut cycles: HashMap<String, Cycle> = HashMap::new();
@@ -230,7 +241,7 @@ pub(crate) fn get_cycle_from_context(level: &str, list: ContextList) -> Result<O
         // convert value from bytes to hex
         let value = match bucket {
             Bucket::Exists(value) => hex::encode(value).to_string(),
-            _ => "".to_string()
+            _ => continue
         };
 
         // create new cycle
