@@ -226,7 +226,7 @@ pub(crate) fn get_cycle_from_context(level: &str, list: ContextList, persistent_
     let cycle_lists = if let Some(ctx) = context_data {
         ctx
     } else {
-        bail!("yolo")
+        bail!("Error getting context data")
     };
 
     // transform cycle list
@@ -316,41 +316,33 @@ pub(crate) fn get_cycle_from_context_as_json(level: &str, cycle_id: &str, list: 
     }
 }
 
-pub(crate) fn get_rolls_owner_current_from_context(level: &str, list: ContextList) -> Result<Option<HashMap<String, HashMap<String, HashMap<String, String>>>>, failure::Error> {
+pub(crate) fn get_rolls_owner_current_from_context(level: &str, list: ContextList, persistent_storage: &PersistentStorage) -> Result<Option<HashMap<String, HashMap<String, HashMap<String, String>>>>, failure::Error> {
     let ctxt_level: usize = level.parse().unwrap();
     // println!("level: {:?}", ctxt_level);
 
-    let context_data = {
-        let reader = list.read().expect("mutex poisoning");
-        if let Ok(Some(c)) = reader.get(ctxt_level) {
-            c
-        } else {
-            bail!("Context data not found")
-        }
-    };
-
-    // get rolls list from context storage
-    let rolls_lists: HashMap<String, Bucket<Vec<u8>>> = context_data.clone().into_iter()
-        .filter(|(k, _)| k.contains("rolls/owner/current"))
-        .filter(|(_, v)| match v {
-            Bucket::Exists(_) => true,
-            _ => false
-        })
-        .collect();
+    let context = TezedgeContext::new(BlockStorage::new(&persistent_storage), list.clone());
+    let context_index = ContextIndex::new(Some(ctxt_level.try_into()?), None);
+    let context_data = context.get_by_key_prefix(&context_index, &vec!["data/rolls/owner/current/".to_string()])?;
 
     // create rolls list
     let mut rolls: HashMap<String, HashMap<String, HashMap<String, String>>> = HashMap::new();
 
+    let rolls_lists = if let Some(ctx) = context_data {
+        ctx
+    } else {
+        bail!("Error getting context data")
+    };
     // process every key value pair
     for (key, bucket) in rolls_lists.iter() {
 
         // create vector from path
+        println!("{}", key);
         let path: Vec<&str> = key.split('/').collect();
 
         // convert value from bytes to hex
         let value = match bucket {
             Bucket::Exists(value) => hex::encode(value).to_string(),
-            _ => "".to_string()
+            _ => continue
         };
 
         // process roll key value pairs
