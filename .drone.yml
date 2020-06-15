@@ -135,7 +135,7 @@ environment:
   # OCAML_NODE_INDEXER_ROOT: http://tz-indexer-ocaml:8002
   # TEZEDGE_NODE_INDEXER_ROOT: http://tz-indexer-ocaml:8002
 
-# steps:
+steps:
 # - name: cleanup-node-data
 #   image: alpine/git
 #   user: root
