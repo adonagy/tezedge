@@ -124,9 +124,9 @@ name: all-tests
 
 environment:
   NETWORK: carthagenet
-  FROM_BLOCK_HEADER: 1
-  TO_BLOCK_HEADER: 372736 # also check parameter --stop=
-  WRK_TEST_BLOCK_HEADER: 390000
+  FROM_BLOCK_HEADER: 372736
+  TO_BLOCK_HEADER: 390000 # also check parameter --stop=
+  WRK_TEST_BLOCK_HEADER: 100
   SODIUM_USE_PKG_CONFIG: 1
   LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts:./target/release
   OCAML_NODE_RPC_CONTEXT_ROOT: http://116.202.128.230:28732
