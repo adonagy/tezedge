@@ -129,11 +129,11 @@ environment:
   WRK_TEST_BLOCK_HEADER: 100
   SODIUM_USE_PKG_CONFIG: 1
   LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts:./target/release
-  OCAML_NODE_RPC_CONTEXT_ROOT: http://ocaml-node-run:8732
-  TEZEDGE_NODE_RPC_CONTEXT_ROOT: http://tezedge-node-run:18732
-  TEZEDGE_NODE_MASTER_RPC_CONTEXT_ROOT: http://tezedge-master-node-run:18732
-  OCAML_NODE_INDEXER_ROOT: http://tz-indexer-ocaml:8002
-  TEZEDGE_NODE_INDEXER_ROOT: http://tz-indexer-ocaml:8002
+  OCAML_NODE_RPC_CONTEXT_ROOT: http://116.202.128.230:28732
+  TEZEDGE_NODE_RPC_CONTEXT_ROOT: http://116.202.128.230:18732
+  # TEZEDGE_NODE_MASTER_RPC_CONTEXT_ROOT: http://tezedge-master-node-run:18732
+  # OCAML_NODE_INDEXER_ROOT: http://tz-indexer-ocaml:8002
+  # TEZEDGE_NODE_INDEXER_ROOT: http://tz-indexer-ocaml:8002
 
 # steps:
 # - name: cleanup-node-data
