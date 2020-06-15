@@ -19,7 +19,7 @@ pub enum NodeType {
 #[tokio::test]
 async fn test_rpc_compare() {
     // integration_tests_rpc(from_block_header(), to_block_header()).await
-    start_test(from_block_header(), to_block_header(), 3).await;
+    start_test(from_block_header(), to_block_header(), 5).await;
 }
 
 async fn start_test(from_block: i64, to_block: i64, thread_count: i64) {
