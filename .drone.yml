@@ -124,7 +124,7 @@ name: all-tests
 
 environment:
   NETWORK: carthagenet
-  FROM_BLOCK_HEADER: 458751
+  FROM_BLOCK_HEADER: 495676
   TO_BLOCK_HEADER: 500000 # also check parameter --stop=
   WRK_TEST_BLOCK_HEADER: 100
   SODIUM_USE_PKG_CONFIG: 1
