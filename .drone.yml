@@ -217,7 +217,8 @@ steps:
     - name: sandbox-data
       path: /tmp/sandbox
   commands:
-    - curl --request POST http://116.202.128.230:18732/injection/operation --header 'Content-Type: application/json' --data-raw '"8859050fb68120f00ce98878ddb2d7bb8745fb27b81eed7848a484f32e680f816c0002298c03ed7d454a101eb7022bc95f7e5f41ac78820a01c3509502c0843d000053c1edca8bd5c21c61d6f1fd091fa51d562aff1d00342281e4f6898ab794358f8f1130fac71aec731cb6f08ac537aea89ab79975047cff2d91fc4d88f6e9ad6ee65e31b88b4cecb62acc7739204537f54af792580f"' 
+    - TEZEDGE_URL=$${TEZEDGE_NODE_RPC_CONTEXT_ROOT}
+    - curl --request POST "$TEZEDGE_URL/injection/operation" --header 'Content-Type:application/json' --data-raw '"8859050fb68120f00ce98878ddb2d7bb8745fb27b81eed7848a484f32e680f816c0002298c03ed7d454a101eb7022bc95f7e5f41ac78820a01c3509502c0843d000053c1edca8bd5c21c61d6f1fd091fa51d562aff1d00342281e4f6898ab794358f8f1130fac71aec731cb6f08ac537aea89ab79975047cff2d91fc4d88f6e9ad6ee65e31b88b4cecb62acc7739204537f54af792580f"'
 
 
 - name: check-mempool-after-transfer
