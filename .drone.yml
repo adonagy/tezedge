@@ -124,8 +124,8 @@ name: all-tests
 
 environment:
   NETWORK: carthagenet
-  FROM_BLOCK_HEADER: 900000
-  TO_BLOCK_HEADER: 970000 # also check parameter --stop=
+  FROM_BLOCK_HEADER: 970000
+  TO_BLOCK_HEADER: 1008817 # also check parameter --stop=
   WRK_TEST_BLOCK_HEADER: 100
   SODIUM_USE_PKG_CONFIG: 1
   LD_LIBRARY_PATH: ./tezos/interop/lib_tezos/artifacts:./target/release
