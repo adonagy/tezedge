@@ -186,8 +186,21 @@ steps:
     - applied_count=$(echo $tezedge_mempool | jq '.applied | length')
     - /tmp/sandbox/assert_equals.sh 0 $applied_count
 
-# transfer / inject operation to ocaml node, means it injects operations which is spread throught the p2p to other peers
-- name: do-transfer-with-ocaml-client
+# # transfer / inject operation to ocaml node, means it injects operations which is spread throught the p2p to other peers
+# - name: do-transfer-with-ocaml-client
+#   user: root
+#   image: tezos/tezos:v7.2
+#   volumes:
+#     - name: sandbox-data
+#       path: /tmp/sandbox
+#   commands:
+#     - tezos-admin-client -A `cat /tmp/sandbox/ocaml_ip.txt` -P 8732 connect address `cat /tmp/sandbox/tezedge_ip.txt`:9732
+#     - sleep 1
+#     - tezos-client --base-dir /tmp/sandbox/tezos-client -A `cat /tmp/sandbox/ocaml_ip.txt` -P 8732 transfer 1 from bootstrap1 to bootstrap2 --burn-cap 1 &
+#     - sleep 2
+
+# reconnect the two nodes
+- name: reconnect
   user: root
   image: tezos/tezos:v7.2
   volumes:
@@ -196,8 +209,15 @@ steps:
   commands:
     - tezos-admin-client -A `cat /tmp/sandbox/ocaml_ip.txt` -P 8732 connect address `cat /tmp/sandbox/tezedge_ip.txt`:9732
     - sleep 1
-    - tezos-client --base-dir /tmp/sandbox/tezos-client -A `cat /tmp/sandbox/ocaml_ip.txt` -P 8732 transfer 1 from bootstrap1 to bootstrap2 --burn-cap 1 &
-    - sleep 2
+
+- name: inject-operation-into-tezedge
+  user: root
+  image: cfmanteiga/alpine-bash-curl-jq
+  volumes:
+    - name: sandbox-data
+      path: /tmp/sandbox
+  commands:
+    - curl --location --request GET 'http://tezedge-node-sandbox-run:18732/injection/operation' --header 'Content-Type: application/json' --data-raw '"8859050fb68120f00ce98878ddb2d7bb8745fb27b81eed7848a484f32e680f816c0002298c03ed7d454a101eb7022bc95f7e5f41ac78820a01c3509502c0843d000053c1edca8bd5c21c61d6f1fd091fa51d562aff1d00342281e4f6898ab794358f8f1130fac71aec731cb6f08ac537aea89ab79975047cff2d91fc4d88f6e9ad6ee65e31b88b4cecb62acc7739204537f54af792580f"'
 
 - name: check-mempool-after-transfer
   user: root
@@ -241,7 +261,7 @@ volumes:
 
 trigger:
   branch:
-    - master
+    - feature/injection-operation-rpc
 
 ##############################################################################################################
 # This pipeline runs tezedge node with mainnet configuration againts ocaml node with carthagenet configuration
