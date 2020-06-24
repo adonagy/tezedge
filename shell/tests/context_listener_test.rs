@@ -3,7 +3,7 @@
 #![feature(test)]
 extern crate test;
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::thread;
@@ -148,7 +148,7 @@ fn test_apply_block_and_check_context() -> Result<(), failure::Error> {
     Ok(())
 }
 
-fn assert_ctxt(ctxt: HashMap<String, Bucket<Vec<u8>>>, ocaml_ctxt_as_json: String) {
+fn assert_ctxt(ctxt: BTreeMap<String, Bucket<Vec<u8>>>, ocaml_ctxt_as_json: String) {
     let json: Value = serde_json::from_str(&ocaml_ctxt_as_json).unwrap();
     for (key, value) in ctxt.iter() {
         // comparing just data
