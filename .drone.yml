@@ -158,7 +158,7 @@ steps:
     - tezos-client --base-dir /tmp/sandbox/tezos-client -A `cat /tmp/sandbox/ocaml_ip.txt` -P 8732 import secret key activator $${ACTIVATOR_SECRET}
     - tezos-client --base-dir /tmp/sandbox/tezos-client -A `cat /tmp/sandbox/ocaml_ip.txt` -P 8732 import secret key bootstrap1 $${BOOTSTRAP1_SECRET}
     - tezos-client --base-dir /tmp/sandbox/tezos-client -A `cat /tmp/sandbox/ocaml_ip.txt` -P 8732 import secret key bootstrap2 $${BOOTSTRAP2_SECRET}
-    - tezos-client --base-dir /tmp/sandbox/tezos-client -A `cat /tmp/sandbox/ocaml_ip.txt` -P 8732 --block genesis activate protocol PsCARTHAGazKbHtnKfLzQg3kms52kSRpgnDY982a9oYsSXRLQEb with fitness 1 and key activator and parameters /tmp/sandbox/006-carthage-protocol-parameters.json --timestamp $(TZ='AAA+1' date +%FT%TZ)
+    - tezos-client --base-dir /tmp/sandbox/tezos-client -A `cat /tmp/sandbox/ocaml_ip.txt` -P 8732 --block genesis activate protocol PsCARTHAGazKbHtnKfLzQg3kms52kSRpgnDY982a9oYsSXRLQEb with fitness 1 and key activator and parameters /tmp/sandbox/006-carthage-protocol-parameters.json --timestamp 2020-06-24T08:02:48Z
 
 # test checks if this block is synchronized to rust node through p2p
 - name: wait-for-sync-on-level-1
@@ -218,7 +218,7 @@ steps:
       path: /tmp/sandbox
   commands:
     - TEZEDGE_URL=$${TEZEDGE_NODE_RPC_CONTEXT_ROOT}
-    - curl --request POST "$TEZEDGE_URL/injection/operation" --header 'Content-Type:application/json' --data-raw '"c5314e8f9408f9b6eac9a4d4cfe47a5fad6ed2fa24d96ea8fce5aa637c9fa0cf6c0002298c03ed7d454a101eb7022bc95f7e5f41ac78810a01c35000c0843d0000e7670f32038107a59a2b9cfefae36ea21f5aa63c00e6614c78207d6ee3234db35417619c4728ea7c1fa6541bd53ff09d3550d2e51d7fb5908fe9f2202f59c8858a866f6037bee939cb34aedabccf2038a35d261e07"'
+    - curl --request POST "$TEZEDGE_URL/injection/operation" --header 'Content-Type:application/json' --data-raw '"cf764612821498403dd6bd71e2fcbde9ad2c50670113dadc15ec52d167c66b316c0002298c03ed7d454a101eb7022bc95f7e5f41ac78810a01c35000c0843d0000e7670f32038107a59a2b9cfefae36ea21f5aa63c001034e0ad237c810ea3df13e09516e48b21bcd384e53cc5c85cadabfd7d98822a5645e4e624955c41789b1649cd5167205a3941f9f579f575fadcb0a16ae7140e"'
 
 
 - name: check-mempool-after-transfer
