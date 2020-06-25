@@ -101,7 +101,9 @@ pub async fn chains_block_id_header(_: Request<Body>, params: Params, _: Query, 
 
     if chain_id == "main" {
         if block_id == "head" {
-            result_option_to_json_response(service::get_current_head_header(env.state()).map(|res| res), env.log())
+            // debug - hotfix
+            // result_option_to_json_response(service::get_current_head_header(env.state()).map(|res| res), env.log())
+            result_option_to_json_response(service::get_block_header("1011617", env.persistent_storage(), env.state()).map(|res| res), env.log())
         } else {
             result_option_to_json_response(service::get_block_header(block_id, env.persistent_storage(), env.state()).map(|res| res), env.log())
         }
@@ -130,7 +132,7 @@ pub async fn rolls_owner_current(_: Request<Body>, params: Params, _: Query, env
 pub async fn cycle(_: Request<Body>, params: Params, _: Query, env: RpcServiceEnvironment) -> ServiceResult {
     let block_id = params.get_str("block_id").unwrap();
     let cycle_id = params.get_str("cycle_id").unwrap();
-    result_to_json_response(service::get_cycle_from_context_as_json(block_id, cycle_id, env.persistent_storage().context_storage()), env.log())
+    result_to_json_response(service::get_cycle_from_context_as_json(block_id, cycle_id, env.persistent_storage().context_storage(), env.persistent_storage()), env.log())
 }
 
 pub async fn baking_rights(_: Request<Body>, params: Params, query: Query, env: RpcServiceEnvironment) -> ServiceResult {
