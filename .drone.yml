@@ -267,7 +267,7 @@ steps:
 #   command: ["tzindex", "run", "--stop=501"]
 
 - name: indexer-test
-  image: simplestakingcom/tezos-node-bootstrap:latest
+  image: simplestakingcom/tezos-node-bootstrap:indexer_cycle
   commands:
     - tezos-node-bootstrap --indexer-test --level=$${TO_BLOCK_HEADER} --node_tezedge=$${TEZEDGE_NODE_RPC_CONTEXT_ROOT} --indexer_tezedge=$${TEZEDGE_NODE_INDEXER_ROOT} --node_ocaml=$${OCAML_NODE_RPC_CONTEXT_ROOT} --indexer_ocaml=$${OCAML_NODE_INDEXER_ROOT}
 
