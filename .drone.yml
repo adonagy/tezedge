@@ -145,7 +145,7 @@ steps:
 # run empty ocaml sandbox and wait for it
 - name: ocaml-node-sandbox-run
   user: root
-  image: tezos/tezos:v7.2
+  image: tezos/tezos:v7.3
   detach: true
   volumes:
     - name: sandbox-data
