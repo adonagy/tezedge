@@ -10,7 +10,7 @@ ENV RUST_BACKTRACE=1
 ENV SODIUM_USE_PKG_CONFIG=1
 ENV OCAML_BUILD_CHAIN=remote
 # TODO: when merged into develop we should use --branch develop and when its released (merged into master) remove the --branch option completely
-RUN cd /home/appuser && git clone ${tezedge_git} --branch feature/distroless && cd tezedge && cargo build --release
+RUN cd /home/appuser && git clone ${tezedge_git} --branch develop && cd tezedge && cargo build --release
 WORKDIR /home/appuser/tezedge
 RUN mkdir /tmp/tezedge
 RUN mkdir /tmp/tezedge/light-node
