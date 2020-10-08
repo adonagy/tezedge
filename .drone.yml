@@ -857,6 +857,10 @@ steps:
       target: light-node
       tag: latest
       dockerfile: docker/distroless/Dockerfile
+      environment:
+        SOURCE_BRANCH: develop
+      build_args_from_env:
+        [ SOURCE_BRANCH ]
       username:
         from_secret: docker_hub_username
       password:
