@@ -8,7 +8,7 @@ if ! [ -n "$BASH_VERSION" ];then
 fi
 
 # First, run the debugger 
-docker-compose run -d --service-ports debugger
+docker-compose -f docker-compose.debugger.yml run -d --service-ports debugger
 
 wait-for-debugger() {
     echo "Testing $1"
@@ -21,4 +21,4 @@ wait-for-debugger() {
 
 wait-for-debugger http://localhost:17732/v2/log
 
-docker-compose run -d --service-ports rust-node
+docker-compose -f docker-compose.debugger.yml run -d --service-ports rust-node
