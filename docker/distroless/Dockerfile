@@ -25,7 +25,7 @@ COPY --from=build-env /home/appuser/tezedge/target/release/sandbox /
 COPY --from=build-env /home/appuser/tezedge/sandbox/artifacts/tezos-client /
 COPY --from=build-env /home/appuser/tezedge/light_node/etc/tezedge_sandbox/sandbox-patch-context.json /
 
-COPY ./tezedge.config /
+COPY --from=build-env /home/appuser/tezedge/docker/distroless/tezedge.config /
 
 # Copy shared libraries
 COPY --from=build-env /home/appuser/tezedge/tezos/interop/lib_tezos/artifacts/libtezos.so /
