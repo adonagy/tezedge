@@ -182,6 +182,7 @@ steps:
   image: simplestakingcom/tezedge-ci-builder:tmp-python
   pull: if-not-exists
   user: root
+  failure: ignore
   volumes:
     - name: build
       path: /artifacts
@@ -193,8 +194,19 @@ steps:
   commands:
     - pyenv global 3.8.2
     - pwd && ls -la ../../tmp
-    - cd /tmp/tezos-src/tezos/tests_python && poetry install && poetry run pytest -s tests/test_basic.py
-    
+    - cd /tmp/tezos-src/tezos/tests_python && poetry install && poetry run pytest -s --log-dir=. tests/test_basic.py
+
+- name: DBG-print-node-log
+  image: simplestakingcom/tezedge-ci-builder:tmp-python
+  pull: if-not-exists
+  user: root
+  volumes:
+    - name: build
+      path: /artifacts
+    - name: tezos-src
+      path: /tmp/tezos-src
+  commands:
+    - cd /tmp/tezos-src/tezos/tests_python && cat node0_0.txt
 
 volumes:
   - name: build
