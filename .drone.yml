@@ -56,6 +56,8 @@ steps:
     - cp ./tezos/python-tests/tools/constants.py /tmp/tezos-src/tezos/tests_python/tools/constants.py
     - cp ./tezos/python-tests/tools/utils.py /tmp/tezos-src/tezos/tests_python/tools/utils.py
     - cp ./tezos/python-tests/test-parameters.json /tmp/tezos-src/tezos/src/proto_alpha/parameters/test-parameters.json
+    - cp ./tezos/python-tests/bin/tezos-client /tmp/tezos-src/tezos/tezos-client
+    - cp ./tezos/python-tests/bin/tezos-admin-client /tmp/tezos-src/tezos/tezos-admin-client
     - cp /artifacts/light-node /tmp/tezos-src/tezos/light-node
     - cp /artifacts/protocol-runner /tmp/tezos-src/tezos/protocol-runner
     - cp /artifacts/ffi/libtezos.so /tmp/tezos-src/tezos/libtezos.so
