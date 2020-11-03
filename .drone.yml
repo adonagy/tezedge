@@ -38,6 +38,7 @@ steps:
     - rm -rf /home/tezos/data/
     - rm -rf /home/
     - rm -rf /tmp/tezos-src/*
+    # - rm -rf /artifacts/*
 
 - name: tmp1
   image: alpine/git
@@ -104,6 +105,7 @@ steps:
 #     - cp ./target/release/libtezos_interop_callback.so /artifacts/ffi
 #     - cp ./tezos/interop/lib_tezos/artifacts/libtezos.so /artifacts/ffi
 #     - cp ./sandbox/artifacts/tezos-client /artifacts
+#     - cp ./sandbox/artifacts/tezos-admin-client /artifacts
 #     - cp `find ./target/release/deps/ | grep integration_test | grep -v "\.d" | head -1` /artifacts/rpc_integration_test
 #     - cp ./light_node/etc/tezedge_sandbox/sandbox-patch-context.json /tmp/sandbox/
 #     - cp ./light_node/etc/tezedge_sandbox/006-carthage-protocol-parameters.json /tmp/sandbox/
@@ -116,6 +118,7 @@ steps:
 #     - cp ./light_node/etc/drone/assert_contains.sh /artifacts/ && chmod 755 /artifacts/assert_contains.sh
 #     - cp ./light_node/etc/drone/identities/* /artifacts/identities/
 #     - cp ./light_node/etc/tezedge/tezedge_drone.config /artifacts/tezedge/
+#     - exit 1
 
 volumes:
   - name: build
@@ -124,6 +127,9 @@ volumes:
   - name: tezos-src
     host:
       path: /etc/tezos-src
+  - name: sandbox-data
+    host:
+      path: /etc/tezedge-ci-data/sandbox
 
 trigger:
   branch:
