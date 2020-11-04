@@ -3,7 +3,7 @@
 
 use bytes::buf::BufExt;
 use chrono::prelude::*;
-use hyper::{Body, Request};
+use hyper::{Body, Request, Method};
 use slog::warn;
 use serde::Serialize;
 
@@ -302,6 +302,17 @@ pub async fn get_contract_manager_key(_: Request<Body>, params: Params, _: Query
     )
 }
 
+pub async fn get_contract_balance(_: Request<Body>, params: Params, _: Query, env: RpcServiceEnvironment) -> ServiceResult {
+    let _chain_id = params.get_str("chain_id").unwrap();
+    let block_id = params.get_str("block_id").unwrap();
+    let pkh = params.get_str("pkh").unwrap();
+
+    result_to_json_response(
+        services::protocol::proto_get_contract_balance(_chain_id, block_id, pkh, env.persistent_storage(), env.state()),
+        env.log(),
+    )
+}
+
 pub async fn get_block_operation_hashes(_: Request<Body>, params: Params, _: Query, env: RpcServiceEnvironment) -> ServiceResult {
     let _chain_id = params.get_str("chain_id").unwrap();
     let block_id = params.get_str("block_id").unwrap();
@@ -421,6 +432,68 @@ pub async fn preapply_block(req: Request<Body>, params: Params, _: Query, env: R
 pub async fn node_version(_: Request<Body>, _: Params, _: Query, env: RpcServiceEnvironment) -> ServiceResult {
     result_to_json_response(
         base_services::get_node_version(env.network_version()),
+        env.log(),
+    )
+}
+
+// TODO: remove. This is a 'fake it till you make it' handler
+// Handler faking the describe routes in ocaml to be compatible with tezoses python test framework
+pub async fn describe(method: Method, req: Request<Body>, _: Params, _: Query, env: RpcServiceEnvironment) -> ServiceResult {
+    //let method = req.method();
+    let path: Vec<String> = req.uri().path().split("/").skip(2).map(|v| v.to_string()).collect();
+
+    let service_fields = serde_json::json!({
+        "meth": method.as_str(),
+        "path": path,
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+        "query": [],
+        "output": {
+            "json_schema": {},
+            "binary_schema": {
+                "toplevel": {
+                    "fields": [],
+                },
+                "fields": [],
+            },
+        },
+        "error": {
+            "json_schema": {},
+            "binary_schema": {
+                "toplevel": {
+                    "fields": [],
+                },
+                "fields": [],
+            },
+        },
+    });
+
+    let describe_json = match method {
+        Method::GET => {
+            serde_json::json!({
+                "static": {
+                    "get_service": service_fields
+                },
+            })
+        }
+        Method::POST => {
+            serde_json::json!({
+                "static": {
+                    "post_service": service_fields
+                },
+            })
+        }
+        _ => unimplemented!()
+    };
+
+    result_to_json_response(
+        Ok(describe_json),
+        env.log(),
+    )
+}
+
+pub async fn worker_prevalidators(_: Request<Body>, _: Params, _: Query, env: RpcServiceEnvironment) -> ServiceResult {
+    result_to_json_response(
+        base_services::get_prevalidators(&env),
         env.log(),
     )
 }
