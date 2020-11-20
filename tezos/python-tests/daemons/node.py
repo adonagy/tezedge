@@ -6,6 +6,7 @@ import tempfile
 import shutil
 from . import utils
 import time
+import signal
 from tools import paths
 
 # Timeout before killing a node which doesn't react to SIGTERM
@@ -221,7 +222,9 @@ class Node:
     def terminate(self) -> None:
         """Send SIGTERM to node, do nothing if node hasn't been run yet"""
         if self._process is not None:
-            self._process.terminate()
+            # self._process.terminate()
+            self._process.send_signal(signal.SIGINT)
+            time.sleep(5)
 
     def kill(self) -> None:
         """Send SIGKILL to node, do nothing if node hasn't been run yet"""

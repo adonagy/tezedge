@@ -59,8 +59,8 @@ IDENTITIES_SHORT = {
 }
 
 
-ALPHA = "ProtoALphaALphaALphaALphaALphaALphaALphaALphaDdp3zK"
-ALPHA_DAEMON = "alpha"  # tezos-baker-alpha
+ALPHA = "PsCARTHAGazKbHtnKfLzQg3kms52kSRpgnDY982a9oYsSXRLQEb"
+ALPHA_DAEMON = "006-PsCARTHA"  # TODO:fix this, we only support CARTHAGE (rpc router needed); 
 
 BABYLON = "PsBabyM1eUXZseaJdmXFApDSBqj8YBfwELoxZHHW77EMcAbbwAS"
 BABYLON_DAEMON = "005-PsBabyM1"
@@ -209,4 +209,4 @@ NODE_PARAMS = ['--sandbox-patch-context-json-file', paths.TEZOS_HOME + 'sandbox-
                '--ffi-pool-connection-timeout-in-secs=60', 
                '--ffi-pool-max-lifetime-in-secs=21600', 
                '--ffi-pool-idle-timeout-in-secs=1800', '--store-context-actions=false',
-               '--tokio-threads=0', '--enable-testchain=false', '--log-level=info']
+               '--tokio-threads=0', '--enable-testchain=false', '--log-level=debug']
