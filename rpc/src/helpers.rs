@@ -274,7 +274,16 @@ impl MonitorHeadStream {
             let to_yield: Vec<MonitoredOperation> = requested_ops.into_iter()
                 .map(|(k, v)| {
                     streamed_operations.insert(k);
-                    let mut monitor_op: MonitoredOperation = serde_json::from_value(v).unwrap();
+                    let mut monitor_op: MonitoredOperation = match serde_json::from_value(v.clone()) {
+                        Ok(json_value) => {
+                            json_value
+                        }
+                        Err(e) => {
+                            println!("Error: {}", e);
+                            println!("Errored value: {:?}", v);
+                            panic!("Forced panic")
+                        }
+                    };
                     monitor_op.protocol = Some("PsCARTHAGazKbHtnKfLzQg3kms52kSRpgnDY982a9oYsSXRLQEb".to_string());
                     monitor_op
                 })
