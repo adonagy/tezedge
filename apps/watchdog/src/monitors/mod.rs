@@ -5,6 +5,7 @@
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::collections::HashSet;
 
 use shiplift::Docker;
 use slog::{error, info, Logger};
@@ -90,9 +91,11 @@ pub fn start_resource_monitoring(
     ocaml_resource_utilization: ResourceUtilizationStorage,
     tezedge_resource_utilization: ResourceUtilizationStorage,
 ) -> JoinHandle<()> {
-    let resource_monitor = ResourceMonitor::new(
+    let mut resource_monitor = ResourceMonitor::new(
         ocaml_resource_utilization,
         tezedge_resource_utilization,
+        None,
+        HashSet::new(),
         log.clone(),
     );
     tokio::spawn(async move {

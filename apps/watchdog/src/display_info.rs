@@ -5,6 +5,7 @@ use std::fmt;
 
 use merge::Merge;
 use serde::Serialize;
+use getset::Getters;
 
 use shell::stats::memory::ProcessMemoryStats;
 
@@ -77,10 +78,11 @@ impl fmt::Display for DiskSpaceData {
     }
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Getters)]
 pub struct NodeInfo {
     level: u64,
     block_hash: String,
+    #[get = "pub(crate)"]
     timestamp: String,
 }
 
@@ -268,12 +270,7 @@ impl fmt::Display for TezedgeDiskData {
             main_db,
         } = self;
 
-        let total = debugger
-            + context_actions
-            + context_irmin
-            + context_merkle_rocksdb
-            + block_storage
-            + main_db;
+        let total = self.get_total();
         writeln!(
             f,
             "{} MB (total)\n\tMain database: {} MB\n\tContex - irmin: {} MB\n\tContext - rust_merkel_tree: {} MB\n\tContext actions: {} MB\n\tBlock storage (commit log): {} MB\n\tDebugger: {} MB",
@@ -316,6 +313,24 @@ impl TezedgeDiskData {
             context_actions: self.context_actions / 1024 / 1024,
             main_db: self.main_db / 1024 / 1024,
         }
+    }
+
+    pub fn get_total(&self) -> u64 {
+        let TezedgeDiskData {
+            debugger,
+            context_actions,
+            context_irmin,
+            context_merkle_rocksdb,
+            block_storage,
+            main_db,
+        } = self;
+
+        debugger
+            + context_actions
+            + context_irmin
+            + context_merkle_rocksdb
+            + block_storage
+            + main_db
     }
 }
 
