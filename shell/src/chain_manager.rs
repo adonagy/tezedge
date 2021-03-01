@@ -322,6 +322,7 @@ impl ChainManager {
                         );
 
                         for message in received.message.messages() {
+                            info!(log, "DUMMY");
                             match message {
                                 PeerMessage::CurrentBranch(message) => {
                                     peer.update_current_head_level(
