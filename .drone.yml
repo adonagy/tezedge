@@ -27,19 +27,19 @@
 #   cd /tmp/edonet
 #   tar -czvf edonet.20000.snapshoted.tar.gz context store config.json version.json
 #   # copy to drone server
-#   scp edonet.20000.snapshoted.tar.gz root@95.217.110.217:/etc/tezedge-ci/snapshots
+#   scp edonet.20000.snapshoted.tar.gz root@95.217.110.217:/usr/local/etc/tezedge-ci/snapshots
 #
 # - Drone server - extract and prepare dirs:
-#   cd /etc/tezedge-ci/snapshots
-#   mkdir /etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1 /etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-2 /etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-3
-#   tar -xzvf edonet.20000.snapshoted.tar.gz -C /etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/
-#   # check directory `/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/`, should looks like this:
-#     /etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/config.json
-#     /etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/version.json
-#     /etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/context
-#     /etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/store
-#   cp -R /etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/* /etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-2
-#   cp -R /etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/* /etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-3
+#   cd /usr/local/etc/tezedge-ci/snapshots
+#   mkdir /usr/local/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1 /usr/local/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-2 /usr/local/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-3
+#   tar -xzvf edonet.20000.snapshoted.tar.gz -C /usr/local/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/
+#   # check directory `/usr/local/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/`, should looks like this:
+#     /usr/local/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/config.json
+#     /usr/local/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/version.json
+#     /usr/local/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/context
+#     /usr/local/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/store
+#   cp -R /usr/local/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/* /usr/local/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-2
+#   cp -R /usr/local/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/* /usr/local/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-3
 ##############################################################################################################
 
 ##############################################################################################################
@@ -473,22 +473,36 @@ steps:
   # TODO: needs rework and speedup with new CI
   detach: true
 
+- name: copy-to-all-runners
+  image: simplestakingcom/tezedge-ci-builder:latest
+  pull: if-not-exists
+  user: root
+  volumes:
+    - name: build
+      path: /artifacts
+  commands:
+    - rsync -a --progress /usr/local/etc/tezedge-ci/build/ dev@65.21.119.66:/usr/local/etc/tezedge-ci/build
+    - rsync -a --progress /usr/local/etc/tezedge-ci/build/ dev@65.21.119.67:/usr/local/etc/tezedge-ci/build
+    - rsync -a --progress /usr/local/etc/tezedge-ci/build/ dev@65.21.119.68:/usr/local/etc/tezedge-ci/build
+    - rsync -a --progress /usr/local/etc/tezedge-ci/build/ dev@65.21.119.69:/usr/local/etc/tezedge-ci/build
+    - rsync -a --progress /usr/local/etc/tezedge-ci/build/ dev@65.21.119.70:/usr/local/etc/tezedge-ci/build
+
 image_pull_secrets:
   - docker_pull_secret
 
 volumes:
   - name: build
     host:
-      path: /etc/tezedge-ci/build/
+      path: /usr/local/etc/tezedge-ci/build/
   - name: sandbox-data
     host:
-      path: /etc/tezedge-ci/data/sandbox
+      path: /usr/local/etc/tezedge-ci/data/sandbox
   - name: cache
     host:
-      path: /etc/tezedge-ci/cache
+      path: /usr/local/etc/tezedge-ci/cache
   - name: tezos-src
     host:
-      path: /etc/tezedge-ci/tezos-src
+      path: /usr/local/etc/tezedge-ci/tezos-src
 
 trigger:
   branch:
@@ -688,10 +702,10 @@ image_pull_secrets:
 volumes:
   - name: build
     host:
-      path: /etc/tezedge-ci/build/
+      path: /usr/local/etc/tezedge-ci/build/
   - name: tezos-src
     host:
-      path: /etc/tezedge-ci/tezos-src
+      path: /usr/local/etc/tezedge-ci/tezos-src
 
 trigger:
   branch:
@@ -980,10 +994,10 @@ image_pull_secrets:
 volumes:
   - name: build
     host:
-      path: /etc/tezedge-ci/build/
+      path: /usr/local/etc/tezedge-ci/build/
   - name: sandbox-data
     host:
-      path: /etc/tezedge-ci/data/sandbox
+      path: /usr/local/etc/tezedge-ci/data/sandbox
 
 trigger:
   branch:
@@ -1211,10 +1225,10 @@ image_pull_secrets:
 volumes:
   - name: build
     host:
-      path: /etc/tezedge-ci/build/
+      path: /usr/local/etc/tezedge-ci/build/
   - name: sandbox-data
     host:
-      path: /etc/tezedge-ci/data/sandbox
+      path: /usr/local/etc/tezedge-ci/data/sandbox
 
 trigger:
   branch:
@@ -1344,13 +1358,13 @@ image_pull_secrets:
 volumes:
   - name: tezedge-node-data
     host:
-      path: /etc/tezedge-ci/data/tezedge-node
+      path: /usr/local/etc/tezedge-ci/data/tezedge-node
   - name: cache
     host:
-      path: /etc/tezedge-ci/data/cache
+      path: /usr/local/etc/tezedge-ci/data/cache
   - name: build
     host:
-      path: /etc/tezedge-ci/build
+      path: /usr/local/etc/tezedge-ci/build
 
 trigger:
   branch:
@@ -1629,25 +1643,25 @@ image_pull_secrets:
 volumes:
   - name: build
     host:
-      path: /etc/tezedge-ci/build
+      path: /usr/local/etc/tezedge-ci/build
   - name: ocaml-node-delphinet-snapshot-data-1
     host:
-      path: /etc/tezedge-ci/data/ocaml-node-delphinet-snapshot-data-1
+      path: /usr/local/etc/tezedge-ci/data/ocaml-node-delphinet-snapshot-data-1
   - name: ocaml-node-delphinet-snapshot-data-2
     host:
-      path: /etc/tezedge-ci/data/ocaml-node-delphinet-snapshot-data-2
+      path: /usr/local/etc/tezedge-ci/data/ocaml-node-delphinet-snapshot-data-2
   - name: ocaml-node-delphinet-snapshot-data-3
     host:
-      path: /etc/tezedge-ci/data/ocaml-node-delphinet-snapshot-data-3
+      path: /usr/local/etc/tezedge-ci/data/ocaml-node-delphinet-snapshot-data-3
   - name: tezedge-node-data
     host:
-      path: /etc/tezedge-ci/data/tezedge-node
+      path: /usr/local/etc/tezedge-ci/data/tezedge-node
   - name: tezedge-old-node-data
     host:
-      path: /etc/tezedge-ci/data/tezedge-old-node
+      path: /usr/local/etc/tezedge-ci/data/tezedge-old-node
   - name: cache
     host:
-      path: /etc/tezedge-ci/cache
+      path: /usr/local/etc/tezedge-ci/cache
   - name: indexer-tezedge-data
     temp: {}
   - name: indexer-ocaml-data
@@ -1844,19 +1858,19 @@ image_pull_secrets:
 volumes:
   - name: build
     host:
-      path: /etc/tezedge-ci/build
+      path: /usr/local/etc/tezedge-ci/build
   - name: ocaml-node-edo2net-snapshot-data-1
     host:
-      path: /etc/tezedge-ci/data/ocaml-node-edo2net-snapshot-data-1
+      path: /usr/local/etc/tezedge-ci/data/ocaml-node-edo2net-snapshot-data-1
   - name: ocaml-node-edo2net-snapshot-data-2
     host:
-      path: /etc/tezedge-ci/data/ocaml-node-edo2net-snapshot-data-2
+      path: /usr/local/etc/tezedge-ci/data/ocaml-node-edo2net-snapshot-data-2
   - name: ocaml-node-edo2net-snapshot-data-3
     host:
-      path: /etc/tezedge-ci/data/ocaml-node-edo2net-snapshot-data-3
+      path: /usr/local/etc/tezedge-ci/data/ocaml-node-edo2net-snapshot-data-3
   - name: tezedge-node-data
     host:
-      path: /etc/tezedge-ci/data/tezedge-node
+      path: /usr/local/etc/tezedge-ci/data/tezedge-node
   - name: indexer-tezedge-data
     temp: {}
   - name: indexer-ocaml-data
@@ -2054,19 +2068,19 @@ image_pull_secrets:
 volumes:
   - name: build
     host:
-      path: /etc/tezedge-ci/build
+      path: /usr/local/etc/tezedge-ci/build
   - name: ocaml-node-carthagenet-snapshot-data-1
     host:
-      path: /etc/tezedge-ci/data/ocaml-node-carthagenet-snapshot-data-1
+      path: /usr/local/etc/tezedge-ci/data/ocaml-node-carthagenet-snapshot-data-1
   - name: ocaml-node-carthagenet-snapshot-data-2
     host:
-      path: /etc/tezedge-ci/data/ocaml-node-carthagenet-snapshot-data-2
+      path: /usr/local/etc/tezedge-ci/data/ocaml-node-carthagenet-snapshot-data-2
   - name: ocaml-node-carthagenet-snapshot-data-3
     host:
-      path: /etc/tezedge-ci/data/ocaml-node-carthagenet-snapshot-data-3
+      path: /usr/local/etc/tezedge-ci/data/ocaml-node-carthagenet-snapshot-data-3
   - name: tezedge-node-data
     host:
-      path: /etc/tezedge-ci/data/tezedge-node
+      path: /usr/local/etc/tezedge-ci/data/tezedge-node
   - name: indexer-tezedge-data
     temp: {}
   - name: indexer-ocaml-data
@@ -2268,19 +2282,19 @@ image_pull_secrets:
 volumes:
   - name: build
     host:
-      path: /etc/tezedge-ci/build
+      path: /usr/local/etc/tezedge-ci/build
   - name: ocaml-node-mainnet-snapshot-data-1
     host:
-      path: /etc/tezedge-ci/data/ocaml-node-mainnet-snapshot-data-1
+      path: /usr/local/etc/tezedge-ci/data/ocaml-node-mainnet-snapshot-data-1
   - name: ocaml-node-mainnet-snapshot-data-2
     host:
-      path: /etc/tezedge-ci/data/ocaml-node-mainnet-snapshot-data-2
+      path: /usr/local/etc/tezedge-ci/data/ocaml-node-mainnet-snapshot-data-2
   - name: ocaml-node-mainnet-snapshot-data-3
     host:
-      path: /etc/tezedge-ci/data/ocaml-node-mainnet-snapshot-data-3
+      path: /usr/local/etc/tezedge-ci/data/ocaml-node-mainnet-snapshot-data-3
   - name: tezedge-node-data
     host:
-      path: /etc/tezedge-ci/data/tezedge-node
+      path: /usr/local/etc/tezedge-ci/data/tezedge-node
   - name: indexer-tezedge-data
     temp: {}
   - name: indexer-ocaml-data
