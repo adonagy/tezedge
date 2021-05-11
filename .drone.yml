@@ -288,10 +288,11 @@ steps:
     RUST_BACKTRACE: 1
     LOG_LEVEL: debug
     OCAML_LOG_ENABLED: false
-    LD_LIBRARY_PATH: $${BUILD_ARTIFACTS_PATH}/ffi
-    PROTOCOL_RUNNER: $${BUILD_ARTIFACTS_PATH}/protocol-runner
+    LD_LIBRARY_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}/ffi
+    PROTOCOL_RUNNER: /artifacts/build_${DRONE_BUILD_NUMBER}/protocol-runner
     OUT_DIR: .
   commands:
+    - echo $${LD_LIBRARY_PATH}
     - $${BUILD_ARTIFACTS_PATH}/protocol_runner_test --nocapture --ignored test_mutliple_protocol_runners_with_one_write_multiple_read_init_context
     - $${BUILD_ARTIFACTS_PATH}/protocol_runner_test --nocapture --ignored test_readonly_protocol_runner_connection_pool
 
@@ -306,9 +307,9 @@ steps:
     RUST_BACKTRACE: 1
     LOG_LEVEL: debug
     OCAML_LOG_ENABLED: false
-    LD_LIBRARY_PATH: $${BUILD_ARTIFACTS_PATH}/ffi
-    PROTOCOL_RUNNER: $${BUILD_ARTIFACTS_PATH}/protocol-runner
-    CARGO_MANIFEST_DIR: $${BUILD_ARTIFACTS_PATH}/test_data
+    LD_LIBRARY_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}/ffi
+    PROTOCOL_RUNNER: /artifacts/build_${DRONE_BUILD_NUMBER}/protocol-runner
+    CARGO_MANIFEST_DIR: /artifacts/build_${DRONE_BUILD_NUMBER}/test_data
     OUT_DIR: .
   commands:
     - $${BUILD_ARTIFACTS_PATH}/shell_chain_test --nocapture --ignored test_process_current_branch_on_level3_then_current_head_level4
@@ -325,9 +326,9 @@ steps:
     RUST_BACKTRACE: 1
     LOG_LEVEL: debug
     OCAML_LOG_ENABLED: false
-    LD_LIBRARY_PATH: $${BUILD_ARTIFACTS_PATH}/ffi
-    PROTOCOL_RUNNER: $${BUILD_ARTIFACTS_PATH}/protocol-runner
-    CARGO_MANIFEST_DIR: $${BUILD_ARTIFACTS_PATH}/test_data
+    LD_LIBRARY_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}/ffi
+    PROTOCOL_RUNNER: /artifacts/build_${DRONE_BUILD_NUMBER}/protocol-runner
+    CARGO_MANIFEST_DIR: /artifacts/build_${DRONE_BUILD_NUMBER}/test_data
     OUT_DIR: .
   commands:
     - $${BUILD_ARTIFACTS_PATH}/shell_chain_test --nocapture --ignored test_process_reorg_with_different_current_branches
@@ -343,9 +344,9 @@ steps:
     RUST_BACKTRACE: 1
     LOG_LEVEL: debug
     OCAML_LOG_ENABLED: false
-    LD_LIBRARY_PATH: $${BUILD_ARTIFACTS_PATH}/ffi
-    PROTOCOL_RUNNER: $${BUILD_ARTIFACTS_PATH}/protocol-runner
-    CARGO_MANIFEST_DIR: $${BUILD_ARTIFACTS_PATH}/test_data
+    LD_LIBRARY_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}/ffi
+    PROTOCOL_RUNNER: /artifacts/build_${DRONE_BUILD_NUMBER}/protocol-runner
+    CARGO_MANIFEST_DIR: /artifacts/build_${DRONE_BUILD_NUMBER}/test_data
     OUT_DIR: .
   commands:
     - $${BUILD_ARTIFACTS_PATH}/shell_chain_test --nocapture --ignored test_process_current_head_with_malformed_blocks_and_check_blacklist
@@ -361,9 +362,9 @@ steps:
     RUST_BACKTRACE: 1
     LOG_LEVEL: debug
     OCAML_LOG_ENABLED: false
-    LD_LIBRARY_PATH: $${BUILD_ARTIFACTS_PATH}/ffi
-    PROTOCOL_RUNNER: $${BUILD_ARTIFACTS_PATH}/protocol-runner
-    CARGO_MANIFEST_DIR: $${BUILD_ARTIFACTS_PATH}/test_data
+    LD_LIBRARY_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}/ffi
+    PROTOCOL_RUNNER: /artifacts/build_${DRONE_BUILD_NUMBER}/protocol-runner
+    CARGO_MANIFEST_DIR: /artifacts/build_${DRONE_BUILD_NUMBER}/test_data
     OUT_DIR: .
   commands:
     - $${BUILD_ARTIFACTS_PATH}/shell_chain_test --nocapture --ignored test_process_bootstrap_level1324_and_mempool_for_level1325
@@ -379,9 +380,9 @@ steps:
     RUST_BACKTRACE: 1
     LOG_LEVEL: debug
     OCAML_LOG_ENABLED: false
-    LD_LIBRARY_PATH: $${BUILD_ARTIFACTS_PATH}/ffi
-    PROTOCOL_RUNNER: $${BUILD_ARTIFACTS_PATH}/protocol-runner
-    CARGO_MANIFEST_DIR: $${BUILD_ARTIFACTS_PATH}/test_data
+    LD_LIBRARY_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}/ffi
+    PROTOCOL_RUNNER: /artifacts/build_${DRONE_BUILD_NUMBER}/protocol-runner
+    CARGO_MANIFEST_DIR: /artifacts/build_${DRONE_BUILD_NUMBER}/test_data
     OUT_DIR: .
   commands:
     - $${BUILD_ARTIFACTS_PATH}/p2p_test --nocapture --ignored test_peer_threshold
@@ -399,9 +400,9 @@ steps:
     RUST_BACKTRACE: 1
     LOG_LEVEL: info
     OCAML_LOG_ENABLED: false
-    LD_LIBRARY_PATH: $${BUILD_ARTIFACTS_PATH}/ffi
-    PROTOCOL_RUNNER: $${BUILD_ARTIFACTS_PATH}/protocol-runner
-    CARGO_MANIFEST_DIR: $${BUILD_ARTIFACTS_PATH}/test_data
+    LD_LIBRARY_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}/ffi
+    PROTOCOL_RUNNER: /artifacts/build_${DRONE_BUILD_NUMBER}/protocol-runner
+    CARGO_MANIFEST_DIR: /artifacts/build_${DRONE_BUILD_NUMBER}/test_data
     TARGET_ACTION_FILE: /tmp/tezedge-cache/context-replay/generated-1324-context-action-file.data
     OUT_DIR: .
   commands:
@@ -536,7 +537,7 @@ clone:
   disable: true
 
 environment:
-  BUILD_ARTIFACTS_PATH: /artifacts/build_$${DRONE_BUILD_NUMBER}
+  BUILD_ARTIFACTS_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}
 
 steps:
 - name: baker-endorser-test
@@ -837,7 +838,7 @@ environment:
   NETWORK: sandbox
   TEZEDGE_NODE_RPC_CONTEXT_ROOT: http://tezedge-sandbox-run:18732
   TEZEDGE_LAUNCHER_RPC_CONTEXT_ROOT: http://tezedge-sandbox-run:3030
-  BUILD_ARTIFACTS_PATH: /artifacts/build_$${DRONE_BUILD_NUMBER}
+  BUILD_ARTIFACTS_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}
 
 steps:
 - name: tezedge-sandbox-run
@@ -1045,7 +1046,7 @@ environment:
   BOOTSTRAP2_IDENTITY: tz1gjaF81ZRRvdzjobyfVNsAeSC6PScjfQwN
   BOOTSTRAP2_PUBLIC: edpktzNbDAUjUk697W7gYg2CRuBQjyPxbEg8dLccYYwKSKvkPvjtV9
   BOOTSTRAP2_SECRET: unencrypted:edsk39qAm1fiMjgmPkw1EgQYkMzkJezLNewd7PLNHTkr6w9XA2zdfo
-  BUILD_ARTIFACTS_PATH: /artifacts/build_$${DRONE_BUILD_NUMBER}
+  BUILD_ARTIFACTS_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}
 
 steps:
 - name: cleanup-node-data
@@ -1272,7 +1273,7 @@ environment:
   OCAML_NETWORK: delphinet
   OCAML_NODE_RPC_CONTEXT_ROOT: http://ocaml-node-run:8732
   TEZEDGE_NODE_RUN_MAINNET_RPC_CONTEXT_ROOT: http://tezedge-updated-node-run-mainnet:18732
-  BUILD_ARTIFACTS_PATH: /artifacts/build_$${DRONE_BUILD_NUMBER}
+  BUILD_ARTIFACTS_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}
 
 steps:
   - name: cleanup-node-data
@@ -1430,7 +1431,7 @@ environment:
   TEZEDGE_NODE_TARGET_BRANCH_RPC_CONTEXT_ROOT: http://tezedge-old-node-run:18732
   OCAML_NODE_INDEXER_ROOT: http://tz-indexer-ocaml:8002
   TEZEDGE_NODE_INDEXER_ROOT: http://tz-indexer-ocaml:8002
-  BUILD_ARTIFACTS_PATH: /artifacts/build_$${DRONE_BUILD_NUMBER}
+  BUILD_ARTIFACTS_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}
 
 steps:
 - name: cleanup-node-data
@@ -1715,7 +1716,7 @@ environment:
   TEZEDGE_NODE_RPC_CONTEXT_ROOT: http://tezedge-updated-node-run:18732
   OCAML_NODE_INDEXER_ROOT: http://tz-indexer-ocaml:8002
   TEZEDGE_NODE_INDEXER_ROOT: http://tz-indexer-ocaml:8002
-  BUILD_ARTIFACTS_PATH: /artifacts/build_$${DRONE_BUILD_NUMBER}
+  BUILD_ARTIFACTS_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}
 
 steps:
   - name: cleanup-node-data
@@ -1925,7 +1926,7 @@ environment:
   TEZEDGE_NODE_RPC_CONTEXT_ROOT: http://tezedge-updated-node-run:18732
   OCAML_NODE_INDEXER_ROOT: http://tz-indexer-ocaml:8002
   TEZEDGE_NODE_INDEXER_ROOT: http://tz-indexer-ocaml:8002
-  BUILD_ARTIFACTS_PATH: /artifacts/build_$${DRONE_BUILD_NUMBER}
+  BUILD_ARTIFACTS_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}
 
 steps:
   - name: cleanup-node-data
@@ -2136,7 +2137,7 @@ environment:
   TEZEDGE_NODE_RPC_CONTEXT_ROOT: http://tezedge-updated-node-run:18732
   OCAML_NODE_INDEXER_ROOT: http://tz-indexer-ocaml:8002
   TEZEDGE_NODE_INDEXER_ROOT: http://tz-indexer-ocaml:8002
-  BUILD_ARTIFACTS_PATH: /artifacts/build_$${DRONE_BUILD_NUMBER}
+  BUILD_ARTIFACTS_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}
 
 steps:
   - name: cleanup-node-data
