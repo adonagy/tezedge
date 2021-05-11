@@ -96,6 +96,7 @@ steps:
     LOG_LEVEL: info
     OCAML_LOG_ENABLED: false
   commands:
+    - pwd
     # prepare rust toolchain dir
     - echo "`rustup show home`/toolchains/`rustup show active-toolchain | tr " " "\n" | head -1`/lib"
     # build and unit-test
