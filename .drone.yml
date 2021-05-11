@@ -87,6 +87,8 @@ steps:
       path: /tmp/sandbox
     - name: tezos-src
       path: /tmp/tezos-src
+    - name: ids
+      path: /home/appuser/.ssh
   environment:
     RUST_BACKTRACE: 1
     SODIUM_USE_PKG_CONFIG: 1
@@ -152,11 +154,11 @@ steps:
     # collect modified python test framework files
     - cp -R ./tezos/python-tests /tmp/tezos-src/modified
     # copy build files to all other runner machines
-    - rsync -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.66:/usr/local/etc/tezedge-ci/build/$${BUILD_ARTIFACTS_PATH}
-    - rsync -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.67:/usr/local/etc/tezedge-ci/build/$${BUILD_ARTIFACTS_PATH}
-    - rsync -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.68:/usr/local/etc/tezedge-ci/build/$${BUILD_ARTIFACTS_PATH}
-    - rsync -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.69:/usr/local/etc/tezedge-ci/build/$${BUILD_ARTIFACTS_PATH}
-    - rsync -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.70:/usr/local/etc/tezedge-ci/build/$${BUILD_ARTIFACTS_PATH}
+    - rsync -e "ssh -o StrictHostKeyChecking=no" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.66:/usr/local/etc/tezedge-ci/build/$${BUILD_ARTIFACTS_PATH}
+    - rsync -e "ssh -o StrictHostKeyChecking=no" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.67:/usr/local/etc/tezedge-ci/build/$${BUILD_ARTIFACTS_PATH}
+    - rsync -e "ssh -o StrictHostKeyChecking=no" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.68:/usr/local/etc/tezedge-ci/build/$${BUILD_ARTIFACTS_PATH}
+    - rsync -e "ssh -o StrictHostKeyChecking=no" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.69:/usr/local/etc/tezedge-ci/build/$${BUILD_ARTIFACTS_PATH}
+    - rsync -e "ssh -o StrictHostKeyChecking=no" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.70:/usr/local/etc/tezedge-ci/build/$${BUILD_ARTIFACTS_PATH}
 
 # - name: copy-to-all-runners
 #   image: simplestakingcom/tezedge-ci-builder:latest
@@ -510,6 +512,9 @@ volumes:
   - name: tezos-src
     host:
       path: /usr/local/etc/tezedge-ci/tezos-src
+  - name: ids
+    host:
+      path: /usr/local/etc/tezedge-ci/id
 
 trigger:
   branch:
