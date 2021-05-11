@@ -97,74 +97,72 @@ steps:
     OCAML_LOG_ENABLED: false
   commands:
     # prepare rust toolchain dir
-    # - echo "`rustup show home`/toolchains/`rustup show active-toolchain | tr " " "\n" | head -1`/lib"
-    # # build and unit-test
-    # - cargo clean
-    # - cargo build --release --workspace
-    # - cargo test --release --workspace
-    # # build and run benches
-    #   # just compile all benches
-    # - cargo bench --no-run -- --nocapture
-    #   # run benches except tezos_messages (they have special step)
-    # - cargo bench --workspace --exclude tezos_messages --exclude networking --exclude tezos_interop -- --nocapture
-    #   # run all other test benches
-    #   # TODO: uncomment
-    # - cargo bench --tests -- --nocapture
-    # # collect binary artefacts
+    - echo "`rustup show home`/toolchains/`rustup show active-toolchain | tr " " "\n" | head -1`/lib"
+    # build and unit-test
+    - cargo clean
+    - cargo build --release --workspace
+    - cargo test --release --workspace
+    # build and run benches
+      # just compile all benches
+    - cargo bench --no-run -- --nocapture
+      # run benches except tezos_messages (they have special step)
+    - cargo bench --workspace --exclude tezos_messages --exclude networking --exclude tezos_interop -- --nocapture
+      # run all other test benches
+    - cargo bench --tests -- --nocapture
+    # collect binary artefacts
     - mkdir $${BUILD_ARTIFACTS_PATH}
-    # - mkdir $${BUILD_ARTIFACTS_PATH}/ffi
-    # - mkdir $${BUILD_ARTIFACTS_PATH}/tezedge
-    # - mkdir $${BUILD_ARTIFACTS_PATH}/identities
-    # - mkdir -p $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
-    # # copy binaries
-    # - mkdir /tmp/tezos-src/modified
-    # - cp ./target/release/light-node $${BUILD_ARTIFACTS_PATH}
-    # - cp ./target/release/sandbox $${BUILD_ARTIFACTS_PATH}
-    # - cp ./target/release/protocol-runner $${BUILD_ARTIFACTS_PATH}
-    # - cp ./target/release/context-actions-replayer $${BUILD_ARTIFACTS_PATH}
-    # - cp ./tezos/sys/lib_tezos/artifacts/libtezos.so $${BUILD_ARTIFACTS_PATH}/ffi
-    # - cp ./sandbox/artifacts/tezos-client $${BUILD_ARTIFACTS_PATH}
-    # # copy sapling init files
-    # - cp ./tezos/sys/lib_tezos/artifacts/sapling-spend.params $${BUILD_ARTIFACTS_PATH}/ffi
-    # - cp ./tezos/sys/lib_tezos/artifacts/sapling-output.params $${BUILD_ARTIFACTS_PATH}/ffi
-    # # copy test binaries
-    # - cp `find ./target/release/deps/ | grep integration_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/rpc_integration_test
-    # - cp `find ./target/release/deps/ | grep chain_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/shell_chain_test
-    # - cp `find ./target/release/deps/ | grep protocol_runner_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/protocol_runner_test
-    # - cp `find ./target/release/deps/ | grep p2p_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/p2p_test
-    # # copy test resources
-    # - cp ./shell/tests/resources/apply_block_request_until_1326.zip $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
-    # - cp ./shell/tests/resources/sandbox_branch_1_level3.zip $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
-    # - cp ./shell/tests/resources/sandbox_branch_2_level4.zip $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
-    # - cp ./shell/tests/resources/sandbox-patch-context.json $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
-    # # copy sandbox resources
-    # - cp ./light_node/etc/tezedge_sandbox/sandbox-patch-context.json /tmp/sandbox/
-    # - cp ./light_node/etc/tezedge_sandbox/006-carthage-protocol-parameters.json /tmp/sandbox/
-    # - cp ./light_node/etc/tezedge_sandbox/tezedge_drone_sandbox.config /tmp/sandbox/
-    # - cp ./light_node/etc/tezedge_sandbox/sandbox_start_light_node_args.json /tmp/sandbox/
-    # - cp ./light_node/etc/tezedge_sandbox/sandbox_init_client_request.json /tmp/sandbox/
-    # - cp ./light_node/etc/tezedge_sandbox/sandbox_activate_protocol_request.json /tmp/sandbox/
-    # - cp ./light_node/etc/tezedge_sandbox/sandbox_bake_empty_block.json /tmp/sandbox/
-    # # copy other resources
-    # - cp ./light_node/etc/drone/assert_equals.sh $${BUILD_ARTIFACTS_PATH}/ && chmod 755 $${BUILD_ARTIFACTS_PATH}/assert_equals.sh
-    # - cp ./light_node/etc/drone/assert_contains.sh $${BUILD_ARTIFACTS_PATH}/ && chmod 755 $${BUILD_ARTIFACTS_PATH}/assert_contains.sh
-    # - cp ./light_node/etc/drone/wait_file.sh $${BUILD_ARTIFACTS_PATH}/ && chmod 755 $${BUILD_ARTIFACTS_PATH}/wait_file.sh
-    # - cp ./light_node/etc/drone/identities/* $${BUILD_ARTIFACTS_PATH}/identities/
-    # - cp ./light_node/etc/tezedge/tezedge_drone.config $${BUILD_ARTIFACTS_PATH}/tezedge/
-    # # collect modified python test framework files
-    # - cp -R ./tezos/python-tests /tmp/tezos-src/modified
+    - mkdir $${BUILD_ARTIFACTS_PATH}/ffi
+    - mkdir $${BUILD_ARTIFACTS_PATH}/tezedge
+    - mkdir $${BUILD_ARTIFACTS_PATH}/identities
+    - mkdir -p $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
+    # copy binaries
+    - mkdir /tmp/tezos-src/modified
+    - cp ./target/release/light-node $${BUILD_ARTIFACTS_PATH}
+    - cp ./target/release/sandbox $${BUILD_ARTIFACTS_PATH}
+    - cp ./target/release/protocol-runner $${BUILD_ARTIFACTS_PATH}
+    - cp ./target/release/context-actions-replayer $${BUILD_ARTIFACTS_PATH}
+    - cp ./tezos/sys/lib_tezos/artifacts/libtezos.so $${BUILD_ARTIFACTS_PATH}/ffi
+    - cp ./sandbox/artifacts/tezos-client $${BUILD_ARTIFACTS_PATH}
+    # copy sapling init files
+    - cp ./tezos/sys/lib_tezos/artifacts/sapling-spend.params $${BUILD_ARTIFACTS_PATH}/ffi
+    - cp ./tezos/sys/lib_tezos/artifacts/sapling-output.params $${BUILD_ARTIFACTS_PATH}/ffi
+    # copy test binaries
+    - cp `find ./target/release/deps/ | grep integration_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/rpc_integration_test
+    - cp `find ./target/release/deps/ | grep chain_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/shell_chain_test
+    - cp `find ./target/release/deps/ | grep protocol_runner_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/protocol_runner_test
+    - cp `find ./target/release/deps/ | grep p2p_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/p2p_test
+    # copy test resources
+    - cp ./shell/tests/resources/apply_block_request_until_1326.zip $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
+    - cp ./shell/tests/resources/sandbox_branch_1_level3.zip $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
+    - cp ./shell/tests/resources/sandbox_branch_2_level4.zip $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
+    - cp ./shell/tests/resources/sandbox-patch-context.json $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
+    # copy sandbox resources
+    - cp ./light_node/etc/tezedge_sandbox/sandbox-patch-context.json /tmp/sandbox/
+    - cp ./light_node/etc/tezedge_sandbox/006-carthage-protocol-parameters.json /tmp/sandbox/
+    - cp ./light_node/etc/tezedge_sandbox/tezedge_drone_sandbox.config /tmp/sandbox/
+    - cp ./light_node/etc/tezedge_sandbox/sandbox_start_light_node_args.json /tmp/sandbox/
+    - cp ./light_node/etc/tezedge_sandbox/sandbox_init_client_request.json /tmp/sandbox/
+    - cp ./light_node/etc/tezedge_sandbox/sandbox_activate_protocol_request.json /tmp/sandbox/
+    - cp ./light_node/etc/tezedge_sandbox/sandbox_bake_empty_block.json /tmp/sandbox/
+    # copy other resources
+    - cp ./light_node/etc/drone/assert_equals.sh $${BUILD_ARTIFACTS_PATH}/ && chmod 755 $${BUILD_ARTIFACTS_PATH}/assert_equals.sh
+    - cp ./light_node/etc/drone/assert_contains.sh $${BUILD_ARTIFACTS_PATH}/ && chmod 755 $${BUILD_ARTIFACTS_PATH}/assert_contains.sh
+    - cp ./light_node/etc/drone/wait_file.sh $${BUILD_ARTIFACTS_PATH}/ && chmod 755 $${BUILD_ARTIFACTS_PATH}/wait_file.sh
+    - cp ./light_node/etc/drone/identities/* $${BUILD_ARTIFACTS_PATH}/identities/
+    - cp ./light_node/etc/tezedge/tezedge_drone.config $${BUILD_ARTIFACTS_PATH}/tezedge/
+    # collect modified python test framework files
+    - cp -R ./tezos/python-tests /tmp/tezos-src/modified
+    # Modify permissions for ssh key
     - chown appuser /home/appuser/.ssh/id_rsa
     - chown appuser /home/appuser/.ssh
     - chmod 600 /home/appuser/.ssh/id_rsa
     - ls -la /home/appuser/.ssh
-    - touch $${BUILD_ARTIFACTS_PATH}/testfile_from_build_${DRONE_BUILD_NUMBER}
     # copy build files to all other runner machines
     - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.66:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
     - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.67:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
     - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.68:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
     - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.69:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
     - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.70:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
-    - sleep 15000
 # - name: copy-to-all-runners
 #   image: simplestakingcom/tezedge-ci-builder:latest
 #   pull: if-not-exists
