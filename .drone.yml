@@ -55,7 +55,7 @@ workspace:
   path: /drone/src
 
 environment:
-  BUILD_ARTIFACTS_PATH: /artifacts/build_$${DRONE_BUILD_NUMBER}
+  BUILD_ARTIFACTS_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}
 
 steps:
 - name: cleanup-data
@@ -99,14 +99,17 @@ steps:
     # build and unit-test
     - cargo clean
     - cargo build --release --workspace
-    - cargo test --release --workspace
+    # TODO: uncomment
+    # - cargo test --release --workspace
     # build and run benches
       # just compile all benches
-    - cargo bench --no-run -- --nocapture
+      # TODO: uncomment
+    # - cargo bench --no-run -- --nocapture
       # run benches except tezos_messages (they have special step)
     - cargo bench --workspace --exclude tezos_messages --exclude networking --exclude tezos_interop -- --nocapture
       # run all other test benches
-    - cargo bench --tests -- --nocapture
+      # TODO: uncomment
+    # - cargo bench --tests -- --nocapture
     # collect binary artefacts
     - mkdir $${BUILD_ARTIFACTS_PATH}
     - mkdir $${BUILD_ARTIFACTS_PATH}/ffi
@@ -150,6 +153,20 @@ steps:
     - cp ./light_node/etc/tezedge/tezedge_drone.config $${BUILD_ARTIFACTS_PATH}/tezedge/
     # collect modified python test framework files
     - cp -R ./tezos/python-tests /tmp/tezos-src/modified
+
+- name: copy-to-all-runners
+  image: simplestakingcom/tezedge-ci-builder:latest
+  pull: if-not-exists
+  user: root
+  volumes:
+    - name: build
+      path: /artifacts
+  commands:
+    - rsync -a --progress /usr/local/etc/tezedge-ci/build/ dev@65.21.119.66:/usr/local/etc/tezedge-ci/build
+    - rsync -a --progress /usr/local/etc/tezedge-ci/build/ dev@65.21.119.67:/usr/local/etc/tezedge-ci/build
+    - rsync -a --progress /usr/local/etc/tezedge-ci/build/ dev@65.21.119.68:/usr/local/etc/tezedge-ci/build
+    - rsync -a --progress /usr/local/etc/tezedge-ci/build/ dev@65.21.119.69:/usr/local/etc/tezedge-ci/build
+    - rsync -a --progress /usr/local/etc/tezedge-ci/build/ dev@65.21.119.70:/usr/local/etc/tezedge-ci/build
 
 # TODO: Get the artifacts on the beggining of the python test step instead of here (only needed for 1 pipiline so no need to rsync)
 - name: prepare-python-tests
@@ -472,20 +489,6 @@ steps:
       - refs/pull/*/head
   # TODO: needs rework and speedup with new CI
   detach: true
-
-- name: copy-to-all-runners
-  image: simplestakingcom/tezedge-ci-builder:latest
-  pull: if-not-exists
-  user: root
-  volumes:
-    - name: build
-      path: /artifacts
-  commands:
-    - rsync -a --progress /usr/local/etc/tezedge-ci/build/ dev@65.21.119.66:/usr/local/etc/tezedge-ci/build
-    - rsync -a --progress /usr/local/etc/tezedge-ci/build/ dev@65.21.119.67:/usr/local/etc/tezedge-ci/build
-    - rsync -a --progress /usr/local/etc/tezedge-ci/build/ dev@65.21.119.68:/usr/local/etc/tezedge-ci/build
-    - rsync -a --progress /usr/local/etc/tezedge-ci/build/ dev@65.21.119.69:/usr/local/etc/tezedge-ci/build
-    - rsync -a --progress /usr/local/etc/tezedge-ci/build/ dev@65.21.119.70:/usr/local/etc/tezedge-ci/build
 
 image_pull_secrets:
   - docker_pull_secret
