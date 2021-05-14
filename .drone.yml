@@ -42,14 +42,11 @@
 #   cp -R /usr/local/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-1/* /usr/local/etc/tezedge-ci/data/ocaml-node-edonet-snapshot-data-3
 ##############################################################################################################
 
-##############################################################################################################
-# This pipeline:
-# - only one which checkouts git
-# - runs just run tests, and build artifacts to 'build' volume,
-# - aslo copies files needed from git for other pipelines
-##############################################################################################################
 kind: pipeline
-name: build-and-tests
+name: prepare-and-cleanup
+
+clone:
+  disable: true
 
 workspace:
   path: /drone/src
@@ -76,6 +73,91 @@ steps:
     # - rm -rf /artifacts/*
     # - rm -rf /tmp/tezos-src/*
 
+- name: prepare-directory-structure
+  image: alpine/git
+  user: root
+  volumes:
+    - name: build
+      path: /artifacts
+    - name: sandbox-data
+      path: /tmp/sandbox
+    - name: tezos-src
+      path: /tmp/tezos-src
+  commands:
+    - mkdir $${BUILD_ARTIFACTS_PATH}
+    - mkdir $${BUILD_ARTIFACTS_PATH}/ffi
+    - mkdir $${BUILD_ARTIFACTS_PATH}/tezedge
+    - mkdir $${BUILD_ARTIFACTS_PATH}/identities
+    - mkdir -p $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
+    - mkdir $${BUILD_ARTIFACTS_PATH}/tests
+
+- name: distribute-directories
+  image: simplestakingcom/tezedge-ci-builder:latest
+  user: root
+  volumes:
+    - name: build
+      path: /artifacts
+    - name: sandbox-data
+      path: /tmp/sandbox
+    - name: tezos-src
+      path: /tmp/tezos-src
+    - name: ids
+      path: /home/appuser/.ssh
+  commands:
+    # Modify permissions for ssh key
+    - chown appuser /home/appuser/.ssh/id_rsa
+    - chown appuser /home/appuser/.ssh
+    - chmod 600 /home/appuser/.ssh/id_rsa
+    - ls -la /home/appuser/.ssh
+    # distribute the directory structure
+    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --no-perms --no-group --no-owner --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.66:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --no-perms --no-group --no-owner --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.67:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --no-perms --no-group --no-owner --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.68:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --no-perms --no-group --no-owner --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.69:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --no-perms --no-group --no-owner --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.70:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+
+image_pull_secrets:
+  - docker_pull_secret
+
+volumes:
+  - name: build
+    host:
+      path: /usr/local/etc/tezedge-ci/build/
+  - name: sandbox-data
+    host:
+      path: /usr/local/etc/tezedge-ci/data/sandbox
+  - name: cache
+    host:
+      path: /usr/local/etc/tezedge-ci/cache
+  - name: tezos-src
+    host:
+      path: /usr/local/etc/tezedge-ci/tezos-src
+  - name: ids
+    host:
+      path: /usr/local/etc/tezedge-ci/id
+
+trigger:
+  branch:
+    - master
+    - develop
+---
+##############################################################################################################
+# This pipeline:
+# - only one which checkouts git
+# - runs just run tests, and build artifacts to 'build' volume,
+# - aslo copies files needed from git for other pipelines
+##############################################################################################################
+kind: pipeline
+name: build-and-tests
+
+workspace:
+  path: /drone/src
+
+environment:
+  BUILD_ARTIFACTS_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}
+
+steps:
+
 - name: test-and-build-artifacts
   image: simplestakingcom/tezedge-ci-builder:latest
   pull: always
@@ -101,20 +183,7 @@ steps:
     # build and unit-test
     - cargo clean
     - cargo build --release --workspace
-    - cargo test --release --workspace
-    # build and run benches
-      # just compile all benches
-    - cargo bench --no-run -- --nocapture
-      # run benches except tezos_messages (they have special step)
-    - cargo bench --workspace --exclude tezos_messages --exclude networking --exclude tezos_interop -- --nocapture
-      # run all other test benches
-    - cargo bench --tests -- --nocapture
     # collect binary artefacts
-    - mkdir $${BUILD_ARTIFACTS_PATH}
-    - mkdir $${BUILD_ARTIFACTS_PATH}/ffi
-    - mkdir $${BUILD_ARTIFACTS_PATH}/tezedge
-    - mkdir $${BUILD_ARTIFACTS_PATH}/identities
-    - mkdir -p $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
     # copy binaries
     - cp ./target/release/light-node $${BUILD_ARTIFACTS_PATH}
     - cp ./target/release/sandbox $${BUILD_ARTIFACTS_PATH}
@@ -125,16 +194,6 @@ steps:
     # copy sapling init files
     - cp ./tezos/sys/lib_tezos/artifacts/sapling-spend.params $${BUILD_ARTIFACTS_PATH}/ffi
     - cp ./tezos/sys/lib_tezos/artifacts/sapling-output.params $${BUILD_ARTIFACTS_PATH}/ffi
-    # copy test binaries
-    - cp `find ./target/release/deps/ | grep integration_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/rpc_integration_test
-    - cp `find ./target/release/deps/ | grep chain_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/shell_chain_test
-    - cp `find ./target/release/deps/ | grep protocol_runner_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/protocol_runner_test
-    - cp `find ./target/release/deps/ | grep p2p_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/p2p_test
-    # copy test resources
-    - cp ./shell/tests/resources/apply_block_request_until_1326.zip $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
-    - cp ./shell/tests/resources/sandbox_branch_1_level3.zip $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
-    - cp ./shell/tests/resources/sandbox_branch_2_level4.zip $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
-    - cp ./shell/tests/resources/sandbox-patch-context.json $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
     # copy sandbox resources
     - cp ./light_node/etc/tezedge_sandbox/sandbox-patch-context.json /tmp/sandbox/
     - cp ./light_node/etc/tezedge_sandbox/006-carthage-protocol-parameters.json /tmp/sandbox/
@@ -149,17 +208,108 @@ steps:
     - cp ./light_node/etc/drone/wait_file.sh $${BUILD_ARTIFACTS_PATH}/ && chmod 755 $${BUILD_ARTIFACTS_PATH}/wait_file.sh
     - cp ./light_node/etc/drone/identities/* $${BUILD_ARTIFACTS_PATH}/identities/
     - cp ./light_node/etc/tezedge/tezedge_drone.config $${BUILD_ARTIFACTS_PATH}/tezedge/
+    # copy build files to all other runner machines
+    # - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.66:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+    # - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.67:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+    # - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.68:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+    # - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.69:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+    # - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.70:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+
+- name: distribute-binaries
+  image: simplestakingcom/tezedge-ci-builder:latest
+  user: root
+  volumes:
+    - name: build
+      path: /artifacts
+    - name: sandbox-data
+      path: /tmp/sandbox
+    - name: tezos-src
+      path: /tmp/tezos-src
+    - name: ids
+      path: /home/appuser/.ssh
+  commands:
     # Modify permissions for ssh key
     - chown appuser /home/appuser/.ssh/id_rsa
     - chown appuser /home/appuser/.ssh
     - chmod 600 /home/appuser/.ssh/id_rsa
     - ls -la /home/appuser/.ssh
     # copy build files to all other runner machines
-    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.66:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
-    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.67:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
-    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.68:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
-    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.69:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
-    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.70:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --no-perms --no-group --no-owner --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.66:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --no-perms --no-group --no-owner --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.67:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --no-perms --no-group --no-owner --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.68:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --no-perms --no-group --no-owner --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.69:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --no-perms --no-group --no-owner --progress $${BUILD_ARTIFACTS_PATH}/ dev@65.21.119.70:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
+
+image_pull_secrets:
+  - docker_pull_secret
+
+depends_on:
+  - prepare-and-cleanup
+
+volumes:
+  - name: build
+    host:
+      path: /usr/local/etc/tezedge-ci/build/
+  - name: sandbox-data
+    host:
+      path: /usr/local/etc/tezedge-ci/data/sandbox
+  - name: cache
+    host:
+      path: /usr/local/etc/tezedge-ci/cache
+  - name: tezos-src
+    host:
+      path: /usr/local/etc/tezedge-ci/tezos-src
+  - name: ids
+    host:
+      path: /usr/local/etc/tezedge-ci/id
+
+trigger:
+  branch:
+    - master
+    - develop
+
+---
+##############################################################################################################
+kind: pipeline
+name: tests-and-benchmarks
+
+workspace:
+  path: /drone/src
+
+environment:
+  BUILD_ARTIFACTS_PATH: /artifacts/build_${DRONE_BUILD_NUMBER}
+
+steps:
+
+- name: tests
+  image: simplestakingcom/tezedge-ci-builder:latest
+  pull: if-not-exists
+  user: root
+  volumes:
+    - name: build
+      path: /artifacts
+  environment:
+    SODIUM_USE_PKG_CONFIG: 1
+    RUST_BACKTRACE: 1
+  commands:
+    - cargo test --release --workspace
+    # build and run benches
+      # just compile all benches
+    - cargo bench --no-run -- --nocapture
+      # run benches except tezos_messages (they have special step)
+    - cargo bench --workspace --exclude tezos_messages --exclude networking --exclude tezos_interop -- --nocapture
+      # run all other test benches
+    - cargo bench --tests -- --nocapture
+    # copy test binaries
+    - cp `find ./target/release/deps/ | grep integration_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/tests/rpc_integration_test
+    - cp `find ./target/release/deps/ | grep chain_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/tests/shell_chain_test
+    - cp `find ./target/release/deps/ | grep protocol_runner_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/tests/protocol_runner_test
+    - cp `find ./target/release/deps/ | grep p2p_test | grep -v "\.d" | head -1` $${BUILD_ARTIFACTS_PATH}/tests/p2p_test
+    # copy test resources
+    - cp ./shell/tests/resources/apply_block_request_until_1326.zip $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
+    - cp ./shell/tests/resources/sandbox_branch_1_level3.zip $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
+    - cp ./shell/tests/resources/sandbox_branch_2_level4.zip $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
+    - cp ./shell/tests/resources/sandbox-patch-context.json $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources# copy build files to all other runner machines
 
 # this is not triggered on pull request, because there is complex bench comparison on PR
 - name: benchmarks
@@ -244,8 +394,8 @@ steps:
     OUT_DIR: .
   commands:
     - echo $${LD_LIBRARY_PATH}
-    - $${BUILD_ARTIFACTS_PATH}/protocol_runner_test --nocapture --ignored test_mutliple_protocol_runners_with_one_write_multiple_read_init_context
-    - $${BUILD_ARTIFACTS_PATH}/protocol_runner_test --nocapture --ignored test_readonly_protocol_runner_connection_pool
+    - $${BUILD_ARTIFACTS_PATH}/tests/protocol_runner_test --nocapture --ignored test_mutliple_protocol_runners_with_one_write_multiple_read_init_context
+    - $${BUILD_ARTIFACTS_PATH}/tests/protocol_runner_test --nocapture --ignored test_readonly_protocol_runner_connection_pool
 
 - name: current-branch/head-shell-test
   image: simplestakingcom/tezedge-ci-builder:latest
@@ -263,8 +413,8 @@ steps:
     CARGO_MANIFEST_DIR: /artifacts/build_${DRONE_BUILD_NUMBER}/test_data
     OUT_DIR: .
   commands:
-    - $${BUILD_ARTIFACTS_PATH}/shell_chain_test --nocapture --ignored test_process_current_branch_on_level3_then_current_head_level4
-    - $${BUILD_ARTIFACTS_PATH}/shell_chain_test --nocapture --ignored test_process_current_heads_to_level3
+    - $${BUILD_ARTIFACTS_PATH}/tests/shell_chain_test --nocapture --ignored test_process_current_branch_on_level3_then_current_head_level4
+    - $${BUILD_ARTIFACTS_PATH}/tests/shell_chain_test --nocapture --ignored test_process_current_heads_to_level3
 
 - name: simple-reorg-shell-test
   image: simplestakingcom/tezedge-ci-builder:latest
@@ -282,7 +432,7 @@ steps:
     CARGO_MANIFEST_DIR: /artifacts/build_${DRONE_BUILD_NUMBER}/test_data
     OUT_DIR: .
   commands:
-    - $${BUILD_ARTIFACTS_PATH}/shell_chain_test --nocapture --ignored test_process_reorg_with_different_current_branches
+    - $${BUILD_ARTIFACTS_PATH}/tests/shell_chain_test --nocapture --ignored test_process_reorg_with_different_current_branches
 
 - name: multipass-blacklist-shell-test
   image: simplestakingcom/tezedge-ci-builder:latest
@@ -300,7 +450,7 @@ steps:
     CARGO_MANIFEST_DIR: /artifacts/build_${DRONE_BUILD_NUMBER}/test_data
     OUT_DIR: .
   commands:
-    - $${BUILD_ARTIFACTS_PATH}/shell_chain_test --nocapture --ignored test_process_current_head_with_malformed_blocks_and_check_blacklist
+    - $${BUILD_ARTIFACTS_PATH}/tests/shell_chain_test --nocapture --ignored test_process_current_head_with_malformed_blocks_and_check_blacklist
 
 - name: bootstrap-and-mempool-with_stats-shell-test
   image: simplestakingcom/tezedge-ci-builder:latest
@@ -318,7 +468,7 @@ steps:
     CARGO_MANIFEST_DIR: /artifacts/build_${DRONE_BUILD_NUMBER}/test_data
     OUT_DIR: .
   commands:
-    - $${BUILD_ARTIFACTS_PATH}/shell_chain_test --nocapture --ignored test_process_bootstrap_level1324_and_mempool_for_level1325
+    - $${BUILD_ARTIFACTS_PATH}/tests/shell_chain_test --nocapture --ignored test_process_bootstrap_level1324_and_mempool_for_level1325
 
 - name: p2p-threshold-test
   image: simplestakingcom/tezedge-ci-builder:latest
@@ -336,7 +486,7 @@ steps:
     CARGO_MANIFEST_DIR: /artifacts/build_${DRONE_BUILD_NUMBER}/test_data
     OUT_DIR: .
   commands:
-    - $${BUILD_ARTIFACTS_PATH}/p2p_test --nocapture --ignored test_peer_threshold
+    - $${BUILD_ARTIFACTS_PATH}/tests/p2p_test --nocapture --ignored test_peer_threshold
 
 - name: record/replay-context-action-file-test
   image: simplestakingcom/tezedge-ci-builder:latest
@@ -362,7 +512,7 @@ steps:
     - mkdir -p /tmp/tezedge-cache/context-replay
     # generate action file for 1324 blocks
     - echo "... generating context action file ..."
-    - $${BUILD_ARTIFACTS_PATH}/shell_chain_test --nocapture --ignored test_process_bootstrap_level1324_and_generate_action_file
+    - $${BUILD_ARTIFACTS_PATH}/tests/shell_chain_test --nocapture --ignored test_process_bootstrap_level1324_and_generate_action_file
     - ls -lrt $${TARGET_ACTION_FILE}
     # replay action file with rocksdb
     - echo "... replay context action file with rocksdb..."
@@ -452,8 +602,37 @@ steps:
   # TODO: needs rework and speedup with new CI
   detach: true
 
+- name: distribute-test-binaries
+  image: alpine/git
+  user: root
+  volumes:
+    - name: build
+      path: /artifacts
+    - name: sandbox-data
+      path: /tmp/sandbox
+    - name: tezos-src
+      path: /tmp/tezos-src
+    - name: ids
+      path: /home/appuser/.ssh
+  commands:
+    # Modify permissions for ssh key
+    - chown appuser /home/appuser/.ssh/id_rsa
+    - chown appuser /home/appuser/.ssh
+    - chmod 600 /home/appuser/.ssh/id_rsa
+    - ls -la /home/appuser/.ssh
+    # copy build files to all other runner machines
+    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --no-perms --no-group --no-owner --progress $${BUILD_ARTIFACTS_PATH}/tests/ dev@65.21.119.66:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}/tests
+    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --no-perms --no-group --no-owner --progress $${BUILD_ARTIFACTS_PATH}/tests/ dev@65.21.119.67:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}/tests
+    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --no-perms --no-group --no-owner --progress $${BUILD_ARTIFACTS_PATH}/tests/ dev@65.21.119.68:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}/tests
+    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --no-perms --no-group --no-owner --progress $${BUILD_ARTIFACTS_PATH}/tests/ dev@65.21.119.69:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}/tests
+    - rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --no-perms --no-group --no-owner --progress $${BUILD_ARTIFACTS_PATH}/tests/ dev@65.21.119.70:/usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}/tests
+
+
 image_pull_secrets:
   - docker_pull_secret
+
+depends_on:
+  - prepare-and-cleanup
 
 volumes:
   - name: build
@@ -718,6 +897,7 @@ trigger:
 
 depends_on:
   - build-and-tests
+  - tests-and-benchmarks
 
 #############################################################################################################
 # This pipeline runs the python test framwork tests from the tezos repository against tezos ocaml nodes
@@ -1011,6 +1191,7 @@ trigger:
 
 depends_on:
   - build-and-tests
+  - tests-and-benchmarks
 
 ##############################################################################################################
 # This pipeline runs tezedge node with sandbox configuration and does transfer with tezos_client
@@ -1233,7 +1414,7 @@ steps:
   commands:
     - export NODE_RPC_CONTEXT_ROOT_1=$${OCAML_NODE_RPC_CONTEXT_ROOT}
     - export NODE_RPC_CONTEXT_ROOT_2=$${TEZEDGE_NODE_RPC_CONTEXT_ROOT}
-    - $${BUILD_ARTIFACTS_PATH}/rpc_integration_test --nocapture --ignored test_rpc_compare
+    - $${BUILD_ARTIFACTS_PATH}/tests/rpc_integration_test --nocapture --ignored test_rpc_compare
 
 image_pull_secrets:
   - docker_pull_secret
@@ -1253,6 +1434,7 @@ trigger:
 
 depends_on:
   - build-and-tests
+  - tests-and-benchmarks
 
 ##############################################################################################################
 # This pipeline runs tezedge node with mainnet configuration againts ocaml node with different network cfg
@@ -1392,6 +1574,7 @@ trigger:
 
 depends_on:
   - build-and-tests
+  - tests-and-benchmarks
 
 ##############################################################################################################
 # This pipeline runs tezedge node and ocaml node,
@@ -1617,7 +1800,7 @@ steps:
   commands:
     - export NODE_RPC_CONTEXT_ROOT_1=$${OCAML_NODE_RPC_CONTEXT_ROOT_1}
     - export NODE_RPC_CONTEXT_ROOT_2=$${TEZEDGE_NODE_RPC_CONTEXT_ROOT}
-    - $${BUILD_ARTIFACTS_PATH}/rpc_integration_test --nocapture --ignored test_rpc_compare
+    - $${BUILD_ARTIFACTS_PATH}/tests/rpc_integration_test --nocapture --ignored test_rpc_compare
 
 # compare indexing from FROM_BLOCK_HEADER to TO_BLOCK_HEADER between defined nodes
 - name: indexer-test
@@ -1696,6 +1879,7 @@ trigger:
 
 depends_on:
   - build-and-tests
+  - tests-and-benchmarks
 
 ##############################################################################################################
 # This pipeline runs tezedge node with edo2net configuration againts ocaml node with edo2net snapshot
@@ -1869,7 +2053,7 @@ steps:
     commands:
       - export NODE_RPC_CONTEXT_ROOT_1=$${OCAML_NODE_RPC_CONTEXT_ROOT_1}
       - export NODE_RPC_CONTEXT_ROOT_2=$${TEZEDGE_NODE_RPC_CONTEXT_ROOT}
-      - $${BUILD_ARTIFACTS_PATH}/rpc_integration_test --nocapture --ignored test_rpc_compare
+      - $${BUILD_ARTIFACTS_PATH}/tests/rpc_integration_test --nocapture --ignored test_rpc_compare
 
   # compare indexing from FROM_BLOCK_HEADER to TO_BLOCK_HEADER between defined nodes
   - name: indexer-test
@@ -1908,6 +2092,7 @@ trigger:
 
 depends_on:
   - build-and-tests
+  - tests-and-benchmarks
 
 ##############################################################################################################
 # This pipeline runs tezedge node with carthagenet configuration againts ocaml node with carthagenet snapshot
@@ -2084,7 +2269,7 @@ steps:
     commands:
       - export NODE_RPC_CONTEXT_ROOT_1=$${OCAML_NODE_RPC_CONTEXT_ROOT_1}
       - export NODE_RPC_CONTEXT_ROOT_2=$${TEZEDGE_NODE_RPC_CONTEXT_ROOT}
-      - $${BUILD_ARTIFACTS_PATH}/rpc_integration_test --nocapture --ignored test_rpc_compare
+      - $${BUILD_ARTIFACTS_PATH}/tests/rpc_integration_test --nocapture --ignored test_rpc_compare
 
   # compare indexing from FROM_BLOCK_HEADER to TO_BLOCK_HEADER between defined nodes
   - name: indexer-test
@@ -2124,6 +2309,7 @@ trigger:
 
 depends_on:
   - build-and-tests
+  - tests-and-benchmarks
 
 
 ##############################################################################################################
@@ -2302,7 +2488,7 @@ steps:
       - export IGNORE_PATH_PATTERNS=votes/listings,/minimal_valid_time
       # mainnet rpcs of protocol 001 are too slow
       - export TO_BLOCK_HEADER=$${TO_BLOCK_HEADER_FOR_RPC}
-      - $${BUILD_ARTIFACTS_PATH}/rpc_integration_test --nocapture --ignored test_rpc_compare
+      - $${BUILD_ARTIFACTS_PATH}/tests/rpc_integration_test --nocapture --ignored test_rpc_compare
 
   # compare indexing from FROM_BLOCK_HEADER to TO_BLOCK_HEADER between defined nodes
   - name: indexer-test
@@ -2341,6 +2527,7 @@ trigger:
 
 depends_on:
   - build-and-tests
+  - tests-and-benchmarks
 
 ##############################################################################################################
 # This pipeline builds a docker image and pushes it to docker HUB - (latest) from develop branch
