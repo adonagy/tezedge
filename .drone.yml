@@ -56,7 +56,7 @@ environment:
 
 steps:
 - name: cleanup-data
-  image: alpine/git
+  image: simplestakingcom/tezedge-ci-builder:latest
   user: root
   volumes:
     - name: build
@@ -74,7 +74,7 @@ steps:
     # - rm -rf /tmp/tezos-src/*
 
 - name: prepare-directory-structure
-  image: alpine/git
+  image: simplestakingcom/tezedge-ci-builder:latest
   user: root
   volumes:
     - name: build
@@ -603,7 +603,7 @@ steps:
   detach: true
 
 - name: distribute-test-binaries
-  image: alpine/git
+  image: simplestakingcom/tezedge-ci-builder:latest
   user: root
   volumes:
     - name: build
