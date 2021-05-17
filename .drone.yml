@@ -209,6 +209,7 @@ steps:
     - ls -la /home/appuser/.ssh
     # copy build files to all other runner machines
     - echo "runner = $${DRONE_RUNNER_IP_ADDRESS}"
+    - chmod 755 ./synchronize_ci.sh && ./synchronize_ci.sh $${BUILD_ARTIFACTS_PATH} /usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}
     - chmod 755 ./synchronize_ci.sh && ./synchronize_ci.sh $${BUILD_ARTIFACTS_PATH}/build_files /usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}/build_files
     
 image_pull_secrets:
