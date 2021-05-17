@@ -148,7 +148,7 @@ environment:
 
 steps:
 
-- name: test-and-build-artifacts
+- name: build-artifacts
   image: simplestakingcom/tezedge-ci-builder:latest
   pull: always
   user: root
@@ -209,6 +209,7 @@ steps:
     - chmod 600 /home/appuser/.ssh/id_rsa
     - ls -la /home/appuser/.ssh
     # copy build files to all other runner machines
+    - echo "runner = $${DRONE_RUNNER_IP_ADDRESS}"
     - chmod 755 ./synchronize_ci.sh && ./synchronize_ci.sh $${BUILD_ARTIFACTS_PATH}/build_files /usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}/build_files
     
 image_pull_secrets:
@@ -1259,7 +1260,7 @@ steps:
     - rust_libs=$(echo "`rustup show home`/toolchains/`rustup show active-toolchain | tr " " "\n" | head -1`/lib")
     - export LD_LIBRARY_PATH="$${BUILD_ARTIFACTS_PATH}/build_files/ffi:$rust_libs"
     - echo "LD_LIBRARY_PATH - $LD_LIBRARY_PATH"
-    - $${BUILD_ARTIFACTS_PATH}/build_files/light-node --config-file /tmp/sandbox/tezedge_drone_sandbox.config --identity-expected-pow 0.0 --identity-file /tmp/sandbox/light-node/identity.json --tezos-data-dir /tmp/sandbox/tezos-node --bootstrap-db-path /tmp/sandbox/light-node --network sandbox --protocol-runner $${BUILD_ARTIFACTS_PATH}/protocol-runner --disable-bootstrap-lookup --peer-thresh-high 1 --peer-thresh-low 1 --sandbox-patch-context-json-file /tmp/sandbox/sandbox-patch-context.json --log-level trace --ocaml-log-enabled true
+    - $${BUILD_ARTIFACTS_PATH}/build_files/light-node --config-file /tmp/sandbox/tezedge_drone_sandbox.config --identity-expected-pow 0.0 --identity-file /tmp/sandbox/light-node/identity.json --tezos-data-dir /tmp/sandbox/tezos-node --bootstrap-db-path /tmp/sandbox/light-node --network sandbox --protocol-runner $${BUILD_ARTIFACTS_PATH}/build_files/protocol-runner --disable-bootstrap-lookup --peer-thresh-high 1 --peer-thresh-low 1 --sandbox-patch-context-json-file /tmp/sandbox/sandbox-patch-context.json --log-level trace --ocaml-log-enabled true
 
 - name: wait-for-tezedge-to-start
   image: simplestakingcom/tezos-node-bootstrap:latest
@@ -1490,7 +1491,7 @@ steps:
       - rust_libs=$(echo "`rustup show home`/toolchains/`rustup show active-toolchain | tr " " "\n" | head -1`/lib")
       - export LD_LIBRARY_PATH="$${BUILD_ARTIFACTS_PATH}/build_files/ffi:$rust_libs"
       - echo "LD_LIBRARY_PATH - $LD_LIBRARY_PATH"
-      - $${BUILD_ARTIFACTS_PATH}/light-node --config-file "$${BUILD_ARTIFACTS_PATH}/build_files/tezedge/tezedge_drone.config" --disable-bootstrap-lookup --network mainnet --identity-file "$${BUILD_ARTIFACTS_PATH}/build_files/identities/identity_6.json" --protocol-runner /tmp/tezedge-cache/protocol-runner
+      - $${BUILD_ARTIFACTS_PATH}/build_files/light-node --config-file "$${BUILD_ARTIFACTS_PATH}/build_files/tezedge/tezedge_drone.config" --disable-bootstrap-lookup --network mainnet --identity-file "$${BUILD_ARTIFACTS_PATH}/build_files/identities/identity_6.json" --protocol-runner /tmp/tezedge-cache/protocol-runner
 
   - name: bootstrapping-tezedge
     image: simplestakingcom/tezos-node-bootstrap:latest
@@ -2418,7 +2419,7 @@ steps:
       SODIUM_USE_PKG_CONFIG: 1
     commands:
       # TODO: remove
-      - cp $${BUILD_ARTIFACTS_PATH}/ffi/sapling-spend.params /artifacts
+      - cp $${BUILD_ARTIFACTS_PATH}/build_files/ffi/sapling-spend.params /artifacts
       - cp $${BUILD_ARTIFACTS_PATH}/ffi/sapling-output.params /artifacts
       - PEERS=$(cat $${BUILD_ARTIFACTS_PATH}/ocaml_ip1.txt | awk '{print $1 ","}')$(cat $${BUILD_ARTIFACTS_PATH}/ocaml_ip2.txt | awk '{print $1 ","}')$(cat $${BUILD_ARTIFACTS_PATH}/ocaml_ip3.txt)
       - echo "peers - $PEERS"
