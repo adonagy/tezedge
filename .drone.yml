@@ -66,6 +66,7 @@ steps:
     - name: tezos-src
       path: /tmp/tezos-src
   commands:
+    - printenv
     - rm -rf /tmp/sandbox/light-node
     - rm -rf /tmp/sandbox/tezos-node
     - rm -rf /tmp/sandbox/tezos-client
