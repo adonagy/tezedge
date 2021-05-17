@@ -296,6 +296,7 @@ steps:
     - ls -la /home/appuser/.ssh
     # copy build files to all other runner machines
     - chmod 755 ./synchronize_ci.sh && ./synchronize_ci.sh $${BUILD_ARTIFACTS_PATH}/tests /usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}/tests
+    - chmod 755 ./synchronize_ci.sh && ./synchronize_ci.sh $${BUILD_ARTIFACTS_PATH}/test_data /usr/local/etc/tezedge-ci/build/build_${DRONE_BUILD_NUMBER}/test_data
 
 
 image_pull_secrets:
@@ -2422,7 +2423,7 @@ steps:
     commands:
       # TODO: remove
       - cp $${BUILD_ARTIFACTS_PATH}/build_files/ffi/sapling-spend.params /artifacts
-      - cp $${BUILD_ARTIFACTS_PATH}/ffi/sapling-output.params /artifacts
+      - cp $${BUILD_ARTIFACTS_PATH}/build_files/ffi/sapling-output.params /artifacts
       - PEERS=$(cat $${BUILD_ARTIFACTS_PATH}/ocaml_ip1.txt | awk '{print $1 ","}')$(cat $${BUILD_ARTIFACTS_PATH}/ocaml_ip2.txt | awk '{print $1 ","}')$(cat $${BUILD_ARTIFACTS_PATH}/ocaml_ip3.txt)
       - echo "peers - $PEERS"
       - cp $${BUILD_ARTIFACTS_PATH}/build_files/protocol-runner /tmp/tezedge_developer/

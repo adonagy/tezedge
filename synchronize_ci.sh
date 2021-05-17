@@ -10,6 +10,6 @@ for HOST in "${CI_HOSTS[@]}"
 do
     if [[ $HOST != $DRONE_RUNNER_IP_ADDRESS ]]; then
         echo "Syncing to $HOST"
-        rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -aR --progress $PATH_TO_SYNC/ dev@$HOST:$TARGET_PATH 
+        rsync -e "ssh -o StrictHostKeyChecking=no -i /home/appuser/.ssh/id_rsa" -a --progress $PATH_TO_SYNC/ dev@$HOST:$TARGET_PATH 
     fi
 done
