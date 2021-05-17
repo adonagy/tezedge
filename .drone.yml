@@ -87,13 +87,13 @@ steps:
     - name: ids
       path: /home/appuser/.ssh
   commands:
-    - mkdir $${BUILD_ARTIFACTS_PATH}
-    - mkdir $${BUILD_ARTIFACTS_PATH}/build_files
-    - mkdir $${BUILD_ARTIFACTS_PATH}/build_files/ffi
-    - mkdir $${BUILD_ARTIFACTS_PATH}/build_files/tezedge
-    - mkdir $${BUILD_ARTIFACTS_PATH}/build_files/identities
-    - mkdir -p $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
-    - mkdir $${BUILD_ARTIFACTS_PATH}/tests
+    - mkdir $${BUILD_ARTIFACTS_PATH} && chown appuser $${BUILD_ARTIFACTS_PATH}
+    - mkdir $${BUILD_ARTIFACTS_PATH}/build_files && chown appuser $${BUILD_ARTIFACTS_PATH}/build_files
+    - mkdir $${BUILD_ARTIFACTS_PATH}/build_files/ffi && chown appuser $${BUILD_ARTIFACTS_PATH}/build_files/ffi
+    - mkdir $${BUILD_ARTIFACTS_PATH}/build_files/tezedge && chown appuser $${BUILD_ARTIFACTS_PATH}/build_files/tezedge
+    - mkdir $${BUILD_ARTIFACTS_PATH}/build_files/identities && chown appuser $${BUILD_ARTIFACTS_PATH}/build_files/identities
+    - mkdir -p $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources && chown -R appuser $${BUILD_ARTIFACTS_PATH}/test_data/tests/resources
+    - mkdir $${BUILD_ARTIFACTS_PATH}/tests && chown appuser $${BUILD_ARTIFACTS_PATH}/tests
     # Modify permissions for ssh key
     - chown appuser /home/appuser/.ssh/id_rsa
     - chown appuser /home/appuser/.ssh
