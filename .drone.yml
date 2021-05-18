@@ -1439,7 +1439,7 @@ steps:
   pull: if-not-exists
   user: root
   volumes:
-    - name: test
+    - name: tests
       path: /tests
   environment:
     RUST_BACKTRACE: 1
