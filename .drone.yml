@@ -186,16 +186,16 @@ steps:
     - taskset -c 0 /bin/ping -l 100000 -q -s 10 -f localhost &
     - taskset -c 1 /bin/ping -l 100000 -q -s 10 -f localhost &
     - taskset -c 2 /bin/ping -l 100000 -q -s 10 -f localhost &
-    - taskset -c 3 /bin/ping -l 100000 -q -s 10 -f localhost &
-    - taskset -c 4 /bin/ping -l 100000 -q -s 10 -f localhost &
-    - taskset -c 5 /bin/ping -l 100000 -q -s 10 -f localhost &
-    - taskset -c 6 /bin/ping -l 100000 -q -s 10 -f localhost &
-    - taskset -c 7 /bin/ping -l 100000 -q -s 10 -f localhost &
-    - taskset -c 8 /bin/ping -l 100000 -q -s 10 -f localhost &
-    - taskset -c 9 /bin/ping -l 100000 -q -s 10 -f localhost &
-    - taskset -c 10 /bin/ping -l 100000 -q -s 10 -f localhost &
-    - taskset -c 11 /bin/ping -l 100000 -q -s 10 -f localhost &
-    - taskset -c 12 /bin/ping -l 100000 -q -s 10 -f localhost &
+    # - taskset -c 3 /bin/ping -l 100000 -q -s 10 -f localhost &
+    # - taskset -c 4 /bin/ping -l 100000 -q -s 10 -f localhost &
+    # - taskset -c 5 /bin/ping -l 100000 -q -s 10 -f localhost &
+    # - taskset -c 6 /bin/ping -l 100000 -q -s 10 -f localhost &
+    # - taskset -c 7 /bin/ping -l 100000 -q -s 10 -f localhost &
+    # - taskset -c 8 /bin/ping -l 100000 -q -s 10 -f localhost &
+    # - taskset -c 9 /bin/ping -l 100000 -q -s 10 -f localhost &
+    # - taskset -c 10 /bin/ping -l 100000 -q -s 10 -f localhost &
+    # - taskset -c 11 /bin/ping -l 100000 -q -s 10 -f localhost &
+    # - taskset -c 12 /bin/ping -l 100000 -q -s 10 -f localhost &
     - sleep 65
 
 - name: run-cyclic-test
@@ -359,8 +359,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -390,8 +390,8 @@ image_pull_secrets:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 ---
 ##############################################################################################################
@@ -680,8 +680,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 #############################################################################################################
 # This pipeline runs the python test framwork tests from the tezos repository aginst tezedge nodes - tests_008
@@ -932,8 +932,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -1186,8 +1186,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -1440,8 +1440,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -1681,8 +1681,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -1868,8 +1868,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -2055,8 +2055,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -2330,8 +2330,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -2605,8 +2605,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -2880,8 +2880,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -3118,8 +3118,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -3337,8 +3337,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -3557,8 +3557,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -3779,8 +3779,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -4001,8 +4001,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -4034,8 +4034,8 @@ volumes:
 
 trigger:
   branch:
-    - develop
-    - master
+    - xmaster
+    - xdevelop
 
 steps:
 
@@ -4101,7 +4101,7 @@ volumes:
       path: /usr/local/etc/tezedge-ci/data/cache/build_${DRONE_BUILD_NUMBER}/${DRONE_STAGE_NAME}
   - name: tezos-data
     host:
-      path: /usr/local/etc/tezedge-ci/data/tezedge-node-florencenet-snapshot-data-identity-2
+      path: /usr/local/etc/tezedge-ci/data/tezedge-node-sled-identity2-florencenet-snapshot-data
   - name: build
     host:
       path: /usr/local/etc/tezedge-ci/build
@@ -4111,8 +4111,8 @@ depends_on:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 steps:
 
@@ -4133,7 +4133,7 @@ steps:
     commands:
       - cp $${BUILD_ARTIFACTS_PATH}/build_files/protocol-runner /
       - export LD_LIBRARY_PATH="$${BUILD_ARTIFACTS_PATH}/build_files/ffi:$$(rustc --print sysroot)"
-      - $${BUILD_ARTIFACTS_PATH}/build_files/light-node --config-file="$${BUILD_ARTIFACTS_PATH}/build_files/tezedge/tezedge_drone.config" --rpc-port=18732 --tezos-data-dir /data --bootstrap-db-path bootstrap_db --identity-file identity.json --disable-bootstrap-lookup  --peer-thresh-low=0 --peer-thresh-high=5 --network "$${NETWORK}" --protocol-runner /protocol-runner --tezos-context-storage=irmin
+      - $${BUILD_ARTIFACTS_PATH}/build_files/light-node --config-file="$${BUILD_ARTIFACTS_PATH}/build_files/tezedge/tezedge_drone.config" --rpc-port=18732 --tezos-data-dir /data --bootstrap-db-path bootstrap_db --identity-file identity.json --disable-bootstrap-lookup  --peer-thresh-low=0 --peer-thresh-high=5 --network "$${NETWORK}" --protocol-runner /protocol-runner --tezos-context-storage=irmin --maindb-backend sled
 
   # run indexer
   - name: indexer
@@ -4190,8 +4190,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -4288,7 +4288,7 @@ volumes:
       path: /usr/local/etc/tezedge-ci/data/cache/build_${DRONE_BUILD_NUMBER}/${DRONE_STAGE_NAME}
   - name: tezos-data
     host:
-      path: /usr/local/etc/tezedge-ci/data/tezedge-node-florencenet-snapshot-data-identity-2
+      path: /usr/local/etc/tezedge-ci/data/tezedge-node-sled-identity2-florencenet-snapshot-data
   - name: conseil-sql
     temp: {}
   - name: build
@@ -4300,8 +4300,8 @@ depends_on:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 steps:
 
@@ -4334,7 +4334,7 @@ steps:
     commands:
       - cp $${BUILD_ARTIFACTS_PATH}/build_files/protocol-runner /
       - export LD_LIBRARY_PATH="$${BUILD_ARTIFACTS_PATH}/build_files/ffi:$$(rustc --print sysroot)"
-      - $${BUILD_ARTIFACTS_PATH}/build_files/light-node --config-file="$${BUILD_ARTIFACTS_PATH}/build_files/tezedge/tezedge_drone.config" --rpc-port=18732 --tezos-data-dir /home/tezos/data --bootstrap-db-path bootstrap_db --identity-file identity.json --disable-bootstrap-lookup  --peer-thresh-low=0 --peer-thresh-high=5 --network "$${NETWORK}" --protocol-runner /protocol-runner --tezos-context-storage=irmin
+      - $${BUILD_ARTIFACTS_PATH}/build_files/light-node --config-file="$${BUILD_ARTIFACTS_PATH}/build_files/tezedge/tezedge_drone.config" --rpc-port=18732 --tezos-data-dir /home/tezos/data --bootstrap-db-path bootstrap_db --identity-file identity.json --disable-bootstrap-lookup  --peer-thresh-low=0 --peer-thresh-high=5 --network "$${NETWORK}" --protocol-runner /protocol-runner --tezos-context-storage=irmin --maindb-backend sled
 
   - name: conseil-lorre
     image: cryptonomictech/conseil:latest
@@ -4407,8 +4407,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
   - build-tezedge-binaries
@@ -4491,7 +4491,7 @@ volumes:
       path: /usr/local/etc/tezedge-ci/data/cache/build_${DRONE_BUILD_NUMBER}/${DRONE_STAGE_NAME}
   - name: tezos-data
     host:
-      path: /usr/local/etc/tezedge-ci/data/tezedge-node-florencenet-snapshot-data-identity-2
+      path: /usr/local/etc/tezedge-ci/data/tezedge-node-sled-identity2-florencenet-snapshot-data
   - name: conseil-sql
     temp: {}
   - name: build
@@ -4503,8 +4503,8 @@ depends_on:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 steps:
 
@@ -4525,7 +4525,7 @@ steps:
     commands:
       - cp $${BUILD_ARTIFACTS_PATH}/build_files/protocol-runner /
       - export LD_LIBRARY_PATH="$${BUILD_ARTIFACTS_PATH}/build_files/ffi:$$(rustc --print sysroot)"
-      - $${BUILD_ARTIFACTS_PATH}/build_files/light-node --config-file="$${BUILD_ARTIFACTS_PATH}/build_files/tezedge/tezedge_drone.config" --rpc-port=18732 --tezos-data-dir /home/tezos/data --bootstrap-db-path bootstrap_db --identity-file identity.json --disable-bootstrap-lookup  --peer-thresh-low=0 --peer-thresh-high=5 --network "$${NETWORK}" --protocol-runner /protocol-runner --tezos-context-storage=irmin
+      - $${BUILD_ARTIFACTS_PATH}/build_files/light-node --config-file="$${BUILD_ARTIFACTS_PATH}/build_files/tezedge/tezedge_drone.config" --rpc-port=18732 --tezos-data-dir /home/tezos/data --bootstrap-db-path bootstrap_db --identity-file identity.json --disable-bootstrap-lookup  --peer-thresh-low=0 --peer-thresh-high=5 --network "$${NETWORK}" --protocol-runner /protocol-runner --tezos-context-storage=irmin --maindb-backend sled
 
   - name: tzkt-postgres
     image: postgres:13
@@ -4776,8 +4776,9 @@ steps:
         - refs/pull/*/head
 
 depends_on:
-  - verification/verify-real-time-environment
-
+  # - verification/verify-real-time-environment
+  - build-tezedge-binaries
+  
 node:
   tag: real-time-linux-runner
 
@@ -4797,8 +4798,8 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 ---
 ##############################################################################################################
@@ -5079,11 +5080,12 @@ volumes:
 
 trigger:
   branch:
-    - master
-    - develop
+    - xmaster
+    - xdevelop
 
 depends_on:
-  - verification/verify-real-time-environment
+  # - verification/verify-real-time-environment
+  - build-tezedge-binaries
 
 ---
 ##############################################################################################################
@@ -5317,7 +5319,8 @@ trigger:
     - develop
 
 depends_on:
-  - verification/verify-real-time-environment
+  # - verification/verify-real-time-environment
+  - build-tezedge-binaries
 
 
 ##############################################################################################################

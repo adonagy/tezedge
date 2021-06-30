@@ -4,7 +4,10 @@ PATH_TO_SYNC=$1
 TARGET_PATH=$2
 RSA_PATH=$3
                                                                             # rt-node
-CI_HOSTS=(65.21.119.66 65.21.119.67 65.21.119.68 65.21.119.69 65.21.119.70 135.181.216.254)
+# CI_HOSTS=(65.21.119.66 65.21.119.67 65.21.119.68 65.21.119.69 65.21.119.70 135.181.216.254)
+
+                                    # rt-node
+CI_HOSTS=(65.21.165.82 65.21.165.83 65.21.165.84)
 
 # exclude pushing host (do not synch with self) 
 for HOST in "${CI_HOSTS[@]}"
